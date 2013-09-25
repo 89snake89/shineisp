@@ -106,6 +106,27 @@ class Admin_Form_IspForm extends Zend_Form
             'decorators' => array('Composite'),
             'class'      => 'text-input large-input'
         ));             
+
+        $this->addElement('text', 'custom1', array(
+            'filters'    => array('StringTrim'),
+            'label'      => 'Custom 1',
+            'decorators' => array('Composite'),
+            'class'      => 'text-input large-input'
+        ));             
+
+        $this->addElement('text', 'custom2', array(
+            'filters'    => array('StringTrim'),
+            'label'      => 'Custom 2',
+            'decorators' => array('Composite'),
+            'class'      => 'text-input large-input'
+        ));             
+
+        $this->addElement('text', 'custom3', array(
+            'filters'    => array('StringTrim'),
+            'label'      => 'Custom 3',
+            'decorators' => array('Composite'),
+            'class'      => 'text-input large-input'
+        ));             
         
         $this->addElement('text', 'website', array(
             'filters'    => array('StringTrim'),
@@ -125,10 +146,14 @@ class Admin_Form_IspForm extends Zend_Form
             'label'      => 'Email',
             'class'      => 'text-input large-input'
         ));
-        
                 
         $this->addElement('file', 'logo', array(
             'label'      => 'Logo',
+            'class'      => 'text-input large-input'
+        ));
+                
+        $this->addElement('file', 'logo_email', array(
+            'label'      => 'Logo Email',
             'class'      => 'text-input large-input'
         ));
         

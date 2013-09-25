@@ -862,7 +862,7 @@ class Shineisp_Commons_Utilities {
 				
 				
 				if(EmailsTemplatesSends::saveIt($customerId, $from, $to, $subject, $cc, $bcc, $html, $body)){
-					Shineisp_Commons_Utilities::log("An email has been sent to $recipient", 'notice.log'); // log the data
+					Shineisp_Commons_Utilities::log("An email has been sent to $to", 'notice.log'); // log the data
 				}
 				
 			}
@@ -892,6 +892,7 @@ class Shineisp_Commons_Utilities {
 		}
 
 		$EmailTemplate = EmailsTemplates::findByCode($template, null, false, $language_id);
+		$EmailTemplate = null;
 		
 		// Template missing from DB. Let's add it.
 		if ( !is_object($EmailTemplate) || !isset($EmailTemplate->EmailsTemplatesData) || !isset($EmailTemplate->EmailsTemplatesData->{0}) || !isset($EmailTemplate->EmailsTemplatesData->{0}->subject) ) {
@@ -906,10 +907,10 @@ class Shineisp_Commons_Utilities {
 				// Also the fallback template is missing. Something strange is going on.....
 				if (! file_exists ( $filename )) {
 					Shineisp_Commons_Utilities::log("The default email template has not been found: $filename");
-					return array('template' => "Template: ".$template." non trovato", 'subject' => $template);
+					return array('template' => "Template: ".$template." not found", 'subject' => $template);
 				}
 			}
-
+			
 			// Get the content of the file
 			$body = '';
 			foreach ( file ($filename) as $line ) {
@@ -1027,7 +1028,6 @@ class Shineisp_Commons_Utilities {
 		$ISP = ( isset($ISP) && is_array($ISP) ) ? $ISP : ISP::getCurrentISP();
 				
 		// Add some mixed parameters
-		$ISP['signature'] = $ISP['company']."\n".$ISP['website'];
 		$ISP['storename'] = $ISP['company'];
 		
 		// All placeholder prefixed with "isp_" will be replaced with ISP data
@@ -1037,20 +1037,11 @@ class Shineisp_Commons_Utilities {
 		
 		// Merge original placeholder with ISP value. This is done to override standard ISP values
 		$placeholders = array_merge($ISP, $placeholders);
-
-		// Check if special placeholder :shineisp: is set. If is set and is an array, it will use it as a source of key/value
-		if ( isset($placeholders[':shineisp:']) && is_array($placeholders[':shineisp:']) ) {
-			if ( isset($placeholders[':shineisp:'][0]) ) {
-				$placeholders[':shineisp:'] = array_merge($placeholders[':shineisp:'], $placeholders[':shineisp:'][0]);
-				unset($placeholders[':shineisp:'][0]);
-			}
-			foreach ( $placeholders[':shineisp:'] as $k => $v ) {
-				$placeholders[$k] = $v;
-			}
-			
-			unset($placeholders[':shineisp:']);	
-		}
-
+		
+		// Creates a flat array
+		$placeholders = self::flatplaceholders($placeholders);
+// 		Zend_Debug::dump($placeholders);
+// 		die;
 		// Remove unneeded parameters
 		unset($placeholders['active']);
 		unset($placeholders['isppanel']);
@@ -1108,11 +1099,40 @@ class Shineisp_Commons_Utilities {
 		// null recipient, send only to ISP
 		$recipient = ($recipient == null) ? $ISP['email'] : $recipient;
 		
+// 		Zend_Debug::dump($language_id);
+// 		Zend_Debug::dump($recipient);
+// 		Zend_Debug::dump($replyto);
+// 		Zend_Debug::dump($arrFrom);
+// 		Zend_Debug::dump($arrBCC);
+// 		Zend_Debug::dump($arrTemplate['template']);
+// 		echo $arrTemplate['template'];
+// 		die;
 	    // SendEmail    (    $from,        $to,    $bcc,                $subject,                    $body,                      $html, $inreplyto, $attachments, $replyto,    $cc ) 
 		self::SendEmail ( $arrFrom, $recipient, $arrBCC, $arrTemplate['subject'], $arrTemplate['template'], !$arrTemplate['plaintext'], $inreplyto, $attachments, $replyto, $arrCC );
 	}
-
-
+	
+	
+	/**
+	 * Create a flat array for the email template
+	 * 
+	 * @param array $items
+	 * @return multitype:unknown
+	 */
+	private static function flatplaceholders($array, $prefix = '') {
+		$arr = array();
+		foreach($array as $k => $v) {
+			$k = is_numeric($k) ? "item" : $k;
+			
+			if(is_array($v)) {
+				$arr = array_merge($arr, self::flatplaceholders($v, strtolower($prefix . $k . '_')));
+			}
+			else{
+				$arr[$prefix . $k] = $v;
+			}
+		}
+		return $arr;
+	}
+	
 	public static function cvsExport($recordset) {
 		$cvs = "";
 		@unlink ( "documents/export.csv" );

@@ -437,8 +437,7 @@ class Orders extends BaseOrders {
 					$retval = Shineisp_Commons_Utilities::getEmailTemplate ( 'order_message' );
 					
 					if ($retval) {
-						$subject = $retval ['subject'];
-						$body    = $retval ['template'];
+						$in_reply_to = md5($id);
 						
 						// Save the message
 						Messages::addMessage($params ['message'], $order [0] ['Customers'] ['customer_id'], null, $id, null, $isp_id);
@@ -450,15 +449,13 @@ class Orders extends BaseOrders {
 						$placeholders['messagetype'] = $translator->translate('Order Details');
 						$placeholders['message'] = $params ['message'];
 					
-						// Send a message to the customer
-						Messages::sendMessage ( "order_message", Contacts::getEmails($order [0] ['Customers'] ['customer_id']), $placeholders, $order [0] ['Customers'] ['language_id']);
-
+						Shineisp_Commons_Utilities::sendEmailTemplate(Contacts::getEmails($order [0] ['Customers'] ['customer_id']), 'order_message', $placeholders, $in_reply_to, null, null, null, $order [0] ['Customers'] ['language_id']);
+						
 						// Change the URL for the administrator
 						$placeholders['url'] = "http://" . $_SERVER ['HTTP_HOST'] . "/admin/login/link/id/" . $link [0] ['code'] . "/keypass/" . Shineisp_Commons_Hasher::hash_string($isp->email);
 						
 						// Send a message to the administrator
-						Messages::sendMessage ( "order_message_admin", $isp->email, $placeholders);
-						
+						Shineisp_Commons_Utilities::sendEmailTemplate($isp->email, 'order_message_admin', $placeholders, $in_reply_to);
 					}
 				
 				}
@@ -542,7 +539,7 @@ class Orders extends BaseOrders {
 			}
 		
 		} catch ( Exception $e ) {
-			return false;
+			die($e->getMessage());
 		}
 		
 		return false;
@@ -643,6 +640,20 @@ class Orders extends BaseOrders {
 				$orderitem->date_start = $oldOrderDetails [0] ['date_end']; // The new order will have the date_end as date_start
 				$orderitem->date_end = Shineisp_Commons_Utilities::formatDateIn ($date_end);
 
+				// Get the number of the months to be sum to the expiration date of the domain
+				$parameters = json_decode($details ['parameters'], true);
+				$tldid = !empty($parameters['tldid']) ? $parameters['tldid'] : NULL;
+				$domain = !empty($parameters['domain']) ? $parameters['domain'] : NULL;
+					
+				// get the tld information
+				$arrdomain = Shineisp_Commons_Utilities::getTld($domain);
+				if(!empty($arrdomain[1])){
+					$tld = DomainsTlds::getbyTld($arrdomain[1]);
+					if(!empty($tld['tld_id'])){
+						$orderitem->tld_id = $tld['tld_id'];
+					}
+				}
+				
 				$orderitem->order_id = $id;
 				$orderitem->product_id = $details ['product_id'];
 				$orderitem->billing_cycle_id = $details ['billing_cycle_id'];
@@ -652,24 +663,26 @@ class Orders extends BaseOrders {
 				$orderitem->price = $details ['price'];
 				$orderitem->cost = $details ['cost'];
 				$orderitem->status_id = Statuses::id("processing", "orders"); // Processing status set
-				$orderitem->save ();
-				$detailid = $orderitem->getIncremented ();
 				
-				// If the product type is a service we have to add a record in the Orders_items_domains table
-				// in order to join the domain with the service/order item
-				if (! $isDomain) {
-					$oldOID = OrdersItemsDomains::findIDsByOrderItemID ( $details ['detail_id'], 'domain_id', true );
-					if (! empty ( $oldOID [0] ['domain_id'] ) && is_numeric ( $oldOID [0] ['domain_id'] )) {
-						$ordersitemsdomains = new OrdersItemsDomains ();
-						$ordersitemsdomains->domain_id = $oldOID [0] ['domain_id'];
-						$ordersitemsdomains->order_id = $id;
-						$ordersitemsdomains->orderitem_id = $detailid;
-						$ordersitemsdomains->save ();
-						Domains::setStatus ( $oldOID [0] ['domain_id'], Statuses::id("processing", "domains") ); // Set the domains status as processing
-						Domains::setExpirationDate ( $oldOID [0] ['domain_id'], Shineisp_Commons_Utilities::formatDateIn ($date_end) ); // Set the new expiration date
+				if($orderitem->trySave ()){
+					$detailid = $orderitem->getIncremented ();
+					
+					// If the product type is a service we have to add a record in the Orders_items_domains table
+					// in order to join the domain with the service/order item
+					if (! $isDomain) {
+						$oldOID = OrdersItemsDomains::findIDsByOrderItemID ( $details ['detail_id'], 'domain_id', true );
+						if (! empty ( $oldOID [0] ['domain_id'] ) && is_numeric ( $oldOID [0] ['domain_id'] )) {
+							$ordersitemsdomains = new OrdersItemsDomains ();
+							$ordersitemsdomains->domain_id = $oldOID [0] ['domain_id'];
+							$ordersitemsdomains->order_id = $id;
+							$ordersitemsdomains->orderitem_id = $detailid;
+							$ordersitemsdomains->save ();
+							Domains::setStatus ( $oldOID [0] ['domain_id'], Statuses::id("processing", "domains") ); // Set the domains status as processing
+							Domains::setExpirationDate ( $oldOID [0] ['domain_id'], Shineisp_Commons_Utilities::formatDateIn ($date_end) ); // Set the new expiration date
+						}
 					}
+					unset ( $orderitem );
 				}
-				unset ( $orderitem );
 			}
 			
 			// Update Order
@@ -694,7 +707,7 @@ class Orders extends BaseOrders {
 	 * Check if within the list of products exist at least one service/domain set as Autorenewable.
 	 * @return boolean
 	 */
-	private function checkAutorenewProducts($products) {
+	private static function checkAutorenewProducts($products) {
 		foreach ( $products as $product ) {
 			if($product['renew']){
 				return true;
@@ -777,6 +790,9 @@ class Orders extends BaseOrders {
 								
 								if ($product ['type'] == "service") {
 									
+									// Check if the product has some tax to be added
+									$tax = Taxes::getTaxbyProductID ( $oldOrderDetails [0] ['product_id'] );
+									
 									// Get the number of the months to be sum to the expiration date of the service
 									$date_end = Shineisp_Commons_Utilities::add_date ( date ( $oldOrderDetails [0] ['date_end'] ), null, BillingCycle::getMonthsNumber ( $oldOrderDetails [0] ['billing_cycle_id'] ) * $oldOrderDetails [0] ['quantity'] );
 									
@@ -792,9 +808,11 @@ class Orders extends BaseOrders {
 									
 									// get the tld information
 									$arrdomain = Shineisp_Commons_Utilities::getTld($domain);
+									
 									if(!empty($arrdomain[1])){
 										$tld = DomainsTlds::getbyTld($arrdomain[1]);
 										if(!empty($tld['tld_id'])){
+											$tax = Taxes::getTaxbyTldID($tld['tld_id']);  // Check if the product has some tax to be added
 											$orderitem->tld_id = $tld['tld_id'];
 										}
 									}
@@ -816,15 +834,6 @@ class Orders extends BaseOrders {
 								$orderitem->save ();
 								$newOrderItemId = $orderitem->getIncremented ();
 								
-								// sum of all the products prices 
-								$total = $total + ($oldOrderDetails [0] ['price'] * $oldOrderDetails [0] ['quantity']);
-								
-								// Check if the product has some tax to be added
-								$tax = Taxes::getTaxbyProductID ( $oldOrderDetails [0] ['product_id'] );
-								if ( isset ( $tax ['percentage'] ) && $tax ['percentage'] > 0 && !Customers::isVATFree($order->customer_id) ) {
-									$vat = $vat + (($oldOrderDetails [0] ['price'] * $oldOrderDetails [0] ['quantity']) * $tax ['percentage']) / 100;
-								}
-
 								// Attach all the services, products, and domains with the order
 								$oldOID = OrdersItemsDomains::findIDsByOrderItemID ( $product ['oldorderitemid'], null, true );
 								if (isset ( $oldOID [0] )) { // Some services are not linked to a domain
@@ -958,25 +967,30 @@ class Orders extends BaseOrders {
 			
 			// Save order number
 			$order->order_number = self::formatOrderId($order->order_id);
-			$order->save();
 			
-			// Log status change
-			self::logStatusChange($order->order_id, $order->status_id);
-						
-			// Assign the order var to the static var
-			self::$order = $order;
+			// Save the order
+			if($order->trySave()){
 			
-			// Create the fastlink for the order
-			$fastlink = Fastlinks::CreateFastlink('orders', 'edit', json_encode ( array ('id' => $order['order_id'] ) ), 'orders', $order['order_id'], $customerId);
-			
-			// Add a message within the order
-			Messages::addMessage($note, $customerId, null, $order['order_id']);
-			
-			// Execute a custom event
-			self::events()->trigger('orders_create_after', "Orders", array('order' => $order, 'fastlink' => $fastlink));
-			
-			// Return the order object var
-			return self::$order;
+				// Log status change
+				self::logStatusChange($order->order_id, $order->status_id);
+							
+				// Assign the order var to the static var
+				self::$order = $order;
+				
+				// Create the fastlink for the order
+				$fastlink = Fastlinks::CreateFastlink('orders', 'edit', json_encode ( array ('id' => $order['order_id'] ) ), 'orders', $order['order_id'], $customerId);
+				
+				// Add a message within the order
+				Messages::addMessage($note, $customerId, null, $order['order_id']);
+				
+				// Execute a custom event
+				self::events()->trigger('orders_create_after', "Orders", array('order' => $order, 'fastlink' => $fastlink));
+				
+				// Return the order object var
+				return self::$order;
+			}else{
+				throw new Exception('There was a problem when I try to create the order', 1003);
+			}
 			
 		}else{
 			throw new Exception('Customer ID has been not found', 1001);
@@ -1596,6 +1610,7 @@ class Orders extends BaseOrders {
 	public static function find_all_not_paid_orders() {
 		$dq = Doctrine_Query::create ()->from ( 'Orders o' )
 										->leftJoin ( 'o.Statuses s' )
+										->where ( "s.status_id = ?", Statuses::id("tobepaid", "orders") )
 										->andWhere("o.is_renewal = ?", false);
 										
 		return $dq->execute ( array (), Doctrine_Core::HYDRATE_ARRAY );
@@ -1807,6 +1822,7 @@ class Orders extends BaseOrders {
 						}
 						
 						if( !$isTaxFree && !$isVATFree ){
+							
 							// If the product is a domain 
 							if(!empty($detail['tld_id'])){
 								$tax = Taxes::getTaxbyTldID($detail ['tld_id']);	
@@ -2149,7 +2165,6 @@ class Orders extends BaseOrders {
 			
 			$date = explode ( "-", $order [0] ['order_date'] );
 			
-			
 			Shineisp_Commons_Utilities::sendEmailTemplate($customer_email, 'order_new', array(
 				 'orderid'    => $order[0]['order_number']
 				,'email'      => $email
@@ -2263,8 +2278,8 @@ class Orders extends BaseOrders {
 	}
 	
     /**
-     * 
      * print the order
+     * 
      * @param unknown_type $invoiceid
      */
     public static function pdf($order_id, $show = true, $force=false, $path="/documents/orders/") {
@@ -2346,6 +2361,7 @@ class Orders extends BaseOrders {
 				$orderinfo ['invoice_id'] = "";
 				
 				$orderinfo ['company'] ['name'] = $order [0] ['Isp'] ['company'];
+				$orderinfo ['company'] ['manager'] = $order [0] ['Isp'] ['manager'];
 				$orderinfo ['company'] ['vat'] = $order [0] ['Isp'] ['vatnumber'];
 				$orderinfo ['company'] ['bankname'] = $order [0] ['Isp'] ['bankname'];
 				$orderinfo ['company'] ['iban'] = $order [0] ['Isp'] ['iban'];
@@ -2359,6 +2375,9 @@ class Orders extends BaseOrders {
 				$orderinfo ['company'] ['website'] = $order [0] ['Isp'] ['website'];
 				$orderinfo ['company'] ['email'] = $order [0] ['Isp'] ['email'];
 				$orderinfo ['company'] ['slogan'] = $order [0] ['Isp'] ['slogan'];
+				$orderinfo ['company'] ['custom1'] = $order [0] ['Isp'] ['custom1'];
+				$orderinfo ['company'] ['custom2'] = $order [0] ['Isp'] ['custom2'];
+				$orderinfo ['company'] ['custom3'] = $order [0] ['Isp'] ['custom3'];
 				
 				if($order [0] ['status_id'] == Statuses::id("tobepaid", "orders")){ // To be payed
 					$orderinfo ['ribbon']['text'] = $translator->translate("To be Paid");
@@ -2377,7 +2396,6 @@ class Orders extends BaseOrders {
 				$orderinfo ['subtotal'] = $order[0] ['total'];
 				$orderinfo ['grandtotal'] = $order[0] ['grandtotal'];
 				$orderinfo ['vat'] = $order[0] ['vat'];
-				
 				$orderinfo ['delivery'] = 0;
 				
 				$database ['records'] = $orderinfo;
@@ -2763,9 +2781,9 @@ class Orders extends BaseOrders {
 			}
 				
 			$customer_url = "http://" . $_SERVER ['HTTP_HOST'] . "/index/link/id/$fastlink";
-				
+			
 			Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], $template, array(
-				 'orderid'    => $order['order_number']
+				 'orderid'    => !empty($order['order_number']) ? $order['order_number'] : $order['order_id']
 				,':shineisp:' => $customer
 				,'url'        => $customer_url
 			), null, null, null, null, $customer['language_id']);
@@ -2801,7 +2819,7 @@ class Orders extends BaseOrders {
 						
 					$customer_url = "http://" . $_SERVER ['HTTP_HOST'] . "/index/link/id/$fastlink";
 						
-					Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], 'order_cleaned', array(
+					Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], 'order_deleted', array(
 						 'orderid'    => $order['order_number']
 						,':shineisp:' => $customer
 						,'url'        => $customer_url
@@ -2842,10 +2860,12 @@ class Orders extends BaseOrders {
 					$customers [$domain ['customer_id']] ['id'] = $invoice_dest ['customer_id'];
 					$customers [$domain ['customer_id']] ['fullname'] = $invoice_dest ['firstname'] . " " . $invoice_dest ['lastname'] . " " . $invoice_dest ['company'];
 					$customers [$domain ['customer_id']] ['email'] = $invoice_dest ['email'];
+					$customers [$domain ['customer_id']] ['language_id'] = $invoice_dest ['language_id'];
 				} else {
 					$customers [$domain ['customer_id']] ['id'] = $domain ['customer_id'];
 					$customers [$domain ['customer_id']] ['fullname'] = $domain ['fullname'];
 					$customers [$domain ['customer_id']] ['email'] = $domain ['email'];
+					$customers [$domain ['customer_id']] ['language_id'] = $domain ['language_id'];
 				}
 				$customers [$domain ['customer_id']] ['products'] [$i] ['name'] = $domain ['domain'];
 				$customers [$domain ['customer_id']] ['products'] [$i] ['type'] = "domain";
@@ -2917,7 +2937,6 @@ class Orders extends BaseOrders {
 					}
 				}
 				$items = Shineisp_Commons_Utilities::array2table($items);
-				
 				if (! empty ( $items )) {
 					Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], 'reminder', array(
 						'items'      => $items

@@ -26,6 +26,24 @@ class Shineisp_Controller_Plugin_Migrate extends Zend_Controller_Plugin_Abstract
 			$isReady = Shineisp_Main::isReady();
 			
 			if($isReady){
+
+				// Execute the migration
+				if($CurrentVersion < $LatestVersion){
+					
+					// write a log message
+					Shineisp_Commons_Utilities::log("Upgrade: Current Version is $CurrentVersion and the latest available version is $LatestVersion");
+					
+					$dbconfig = Shineisp_Main::databaseConfig();
+						
+					// Update the version in the config.xml file previously created
+					Settings::saveConfig($dbconfig, $LatestVersion);
+					
+					if($CurrentVersion > 0){
+						Shineisp_Commons_Utilities::log("Upgrade: Migrate ShineISP version from $CurrentVersion to $LatestVersion");
+						$migration->migrate();
+					}
+				}
+				
 				$db = Doctrine_Manager::getInstance()->getCurrentConnection();
 				
 				// Read and execute all the sql files saved in the /application/configs/data/sql directory
@@ -111,7 +129,6 @@ class Shineisp_Controller_Plugin_Migrate extends Zend_Controller_Plugin_Abstract
 				Settings::saveConfig($dbconfig, $LatestVersion);
 			
 				if($CurrentVersion > 0){
-					Shineisp_Commons_Utilities::log("Migrate ShineISP version from $CurrentVersion to $LatestVersion");
 					$migration->migrate();
 				}
 			}
