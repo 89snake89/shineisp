@@ -148,31 +148,28 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
      */
     public function addExtension($extension)
     {
-        $this->_extension   = "";
         $extensions = $this->getExtension();
         if (is_string($extension)) {
             $extension = explode(',', $extension);
         }
-        
-        if( ! empty($extension) ) {
-            foreach ($extension as $content) {
-                if (empty($content) || !is_string($content)) {
-                    continue;
-                }
-    
-                $extensions[] = trim($content);
+
+        foreach ($extension as $content) {
+            if (empty($content) || !is_string($content)) {
+                continue;
             }
-            $extensions = array_unique($extensions);
-    
-            // Sanity check to ensure no empty values
-            foreach ($extensions as $key => $ext) {
-                if (empty($ext)) {
-                    unset($extensions[$key]);
-                }
-            }
-    
-            $this->_extension = implode(',', $extensions);
+
+            $extensions[] = trim($content);
         }
+        $extensions = array_unique($extensions);
+
+        // Sanity check to ensure no empty values
+        foreach ($extensions as $key => $ext) {
+            if (empty($ext)) {
+                unset($extensions[$key]);
+            }
+        }
+
+        $this->_extension = implode(',', $extensions);
 
         return $this;
     }
