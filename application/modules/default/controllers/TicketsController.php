@@ -16,7 +16,7 @@ class TicketsController extends Shineisp_Controller_Default {
 		$NS = new Zend_Session_Namespace ( 'Default' );
 		
 		if (empty($NS->customer)) {
-			$this->_helper->redirector ( 'index', 'index', 'default' );
+			$this->_helper->redirector ( 'login', 'customer', 'default' );
 		}
 		$this->customer = $NS->customer;
 		
@@ -63,7 +63,7 @@ class TicketsController extends Shineisp_Controller_Default {
 		
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
-		$this->view->title = $this->translator->translate("Tickets list");
+		$this->view->title = $this->translator->translate("Tickets");
 		$this->view->description = $this->translator->translate("Here you can see the list of all the issue posted.");
 		$this->view->tickets = $data;
 		$this->_helper->viewRenderer ( 'index' );
@@ -114,8 +114,8 @@ class TicketsController extends Shineisp_Controller_Default {
 				$form->populate ( $rs [0] );
 				$this->view->record = $rs [0];
 				$this->view->isp = $isp;
-				$this->view->adminavatar = Shineisp_Commons_Gravatar::get_gravatar ( $isp->email );
-				$this->view->customeravatar = Shineisp_Commons_Gravatar::get_gravatar ( $rs [0] ['email'] );
+				$this->view->adminavatar = Shineisp_Commons_Gravatar::get_gravatar ( $isp->email, 80 );
+				$this->view->customeravatar = Shineisp_Commons_Gravatar::get_gravatar ( $rs [0] ['email'], 80 );
 				$this->view->notes = Tickets::Notes ( $id, "note_id, admin as adminreply, vote as vote, DATE_FORMAT(date_post, '%d/%m/%Y %H:%i:%s') as date_post,CONCAT(c.firstname, ' ', c.lastname) as customer, c.company as company, note", true );
 				$this->view->summary = $rs [0];
 				
@@ -131,13 +131,13 @@ class TicketsController extends Shineisp_Controller_Default {
 			}
 			$this->view->id = $id;
 			
-			$this->view->title = $this->translator->translate('Ticket page');
+			$this->view->title = $this->translator->translate('Ticket');
 			
 			$this->getHelper ( 'layout' )->setLayout ( '2columns-right' );
 			$this->view->placeholder ( "right" )->append ( $this->view->partial ( 'partials/wikisidebar.phtml', array ('items' => Wiki::get_items(5) ) ) );
 		}
 		
-		$this->view->title = $this->translator->translate("Ticket Edit");
+		$this->view->title = $this->translator->translate("Ticket");
 		$this->view->description = $this->translator->translate("Here you can write down your problem. Remember to be clear and analytic in order to explain the problem that has been occurred.");
 		$this->view->dnsdatagrid = $this->dnsGrid ();
 		$this->view->form = $form;
@@ -164,7 +164,7 @@ class TicketsController extends Shineisp_Controller_Default {
 		$request = $this->getRequest ();
 		$customer = $NS->customer ['customer_id'];
 		
-		$this->view->title = $this->translator->translate("Ticket process");
+		$this->view->title = $this->translator->translate("Ticket");
 		$this->view->description = $this->translator->translate("Check the information before save again.");
 			
 		// Check if we have a POST request
@@ -186,7 +186,7 @@ class TicketsController extends Shineisp_Controller_Default {
 		$id = $this->getRequest ()->getParam ( 'ticket_id' );
 		
 		$data = $request->getPost ();
-		$data['note'] = htmlspecialchars($data['note']);
+		$data['note'] = !empty($data['note']) ? $data['note'] : "-"; //There is a problem with TinyMCE!
 		
 		$categoryId = !empty($data['category_id']) && is_numeric($data['category_id']) ? $data['category_id'] : null;
 		
@@ -263,7 +263,7 @@ class TicketsController extends Shineisp_Controller_Default {
 			$cvs = Shineisp_Commons_Utilities::cvsExport ( $tickets );
 			die ( json_encode ( array ('mex' => '<a href="/public/documents/export.csv">' . $registry->Zend_Translate->translate ( "download" ) . '</a>' ) ) );
 		}
-		die ( json_encode ( array ('mex' => $this->translator->translate ( "exporterror" ) ) ) );
+		die ( json_encode ( array ('mex' => $this->translator->translate ( "There was a problem during the export process" ) ) ) );
 	}
 	
 	/*
@@ -284,10 +284,10 @@ class TicketsController extends Shineisp_Controller_Default {
 					die ( json_encode ( array ('mex' => $this->translator->translate ( "The task requested has been executed successfully." ) ) ) );
 				}
 			} else {
-				die ( json_encode ( array ('mex' => $this->translator->translate ( "methodnotset" ) ) ) );
+				die ( json_encode ( array ('mex' => $this->translator->translate ( "This feature has been not released yet" ) ) ) );
 			}
 		}
-		die ( json_encode ( array ('mex' => $this->translator->translate ( "An error has occured during the task requested." ) ) ) );
+		die ( json_encode ( array ('mex' => $this->translator->translate ( "An error occurred during the task execution." ) ) ) );
 	}
 	
 	/**

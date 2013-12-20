@@ -57,8 +57,8 @@ class Admin_LoginController extends Shineisp_Controller_Default {
 				
 					case Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND:
 						/** do stuff for nonexistent identity **/
-						Shineisp_Commons_Utilities::log("Login: User has been not found.", "login.log");
-						$this->view->message = $translation->translate ( 'User has been not found.' );
+						Shineisp_Commons_Utilities::log("Login: User not found.", "login.log");
+						$this->view->message = $translation->translate ( 'User not found.' );
 						break;
 				
 					case Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID:
@@ -76,14 +76,14 @@ class Admin_LoginController extends Shineisp_Controller_Default {
 				
 					case Zend_Auth_Result::FAILURE:
 						/** do stuff for other failure **/
-						Shineisp_Commons_Utilities::log("Login: There was a problem during the login.", "login.log");
-						$this->view->message = $translation->translate ( 'There was a problem during the login.' );
+						Shineisp_Commons_Utilities::log("Login: There was a problem during the login process.", "login.log");
+						$this->view->message = $translation->translate ( 'There was a problem during the login process.' );
 						break;
 				}
 					
 			} else {
-				Shineisp_Commons_Utilities::log("Login: Post request is not valid", "login.log");
-				$this->view->message = $translation->translate ( 'Post request is not valid' );			
+				Shineisp_Commons_Utilities::log("Login: Invalid Post Request.", "login.log");
+				$this->view->message = $translation->translate ( 'Invalid Post Request.' );			
 			}
 		}
 
@@ -126,7 +126,7 @@ class Admin_LoginController extends Shineisp_Controller_Default {
 						
 						Shineisp_Commons_Utilities::SendEmail ( $user ['email'], $user ['email'], null, $subject, $template);
 						
-						$this->view->message = $translator->translate ( 'An email has been sent. Please click at the link included in the body of the email.' );
+						$this->view->message = $translator->translate ( 'An email has been sent. Please check your email and click on the link contained in the email.' );
 					}
 				}
 			}
@@ -168,7 +168,7 @@ class Admin_LoginController extends Shineisp_Controller_Default {
 					
 				Shineisp_Commons_Utilities::SendEmail ( $user ['email'], $user ['email'], null, $subject, $template);
 				
-				$this->view->message = $translator->translate ( 'An email has been sent with the new login credencials' );
+				$this->view->message = $translator->translate ( 'An email has been sent with the new login credentials' );
 			}	
 		}
 		
@@ -199,14 +199,14 @@ class Admin_LoginController extends Shineisp_Controller_Default {
 				$auth->setStorage(new Zend_Auth_Storage_Session('admin'));
 				$auth->authenticate($adapter);
 				
-				// Check if the credencials are set in the Operator profile or the credencials are set in the ISP profile
+				// Check if the credentials are set in the Operator profile or the credentials are set in the ISP profile
 				if ($auth->hasIdentity()) {
 					Fastlinks::updateVisits ( $link [0] ['fastlink_id'] );
 					Shineisp_Commons_Utilities::log("Login: The user has been logged in correctly from " . $_SERVER['REMOTE_ADDR'], "login.log");
 					$this->_helper->redirector ( $link [0] ['action'], $link [0] ['controller'], 'admin', json_decode ( $link [0] ['params'], true ) );
 				} else {
 					
-					// Check if the credencials are set in the Isp profile
+					// Check if the credentials are set in the Isp profile
 					$adapter->setType('isp');
 					
 					$auth->setStorage(new Zend_Auth_Storage_Session('admin'));

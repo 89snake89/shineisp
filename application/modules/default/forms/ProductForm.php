@@ -5,14 +5,15 @@ class Default_Form_ProductForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
-        
+    	$translate = Shineisp_Registry::get('Zend_Translate');
+    	
         $this->addElement('submit', 'submit', array(
             'required' => false,
-            'label'    => 'Add to Cart',
-            'decorators' => array('Composite'),
-            'class'    => 'button small radius success'
+            'label'      => $translate->_('Add to cart'),
+            'decorators' => array('Bootstrap'),
+            'class'    => 'btn btn-success'
         ));
         
-        $this->addElement('hidden', 'product_id', array('decorators' => array('Composite')));
+        $this->addElement('hidden', 'product_id', array('decorators' => array('Bootstrap')));
     }
 }

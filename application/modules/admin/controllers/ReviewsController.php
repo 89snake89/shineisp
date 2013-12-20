@@ -47,7 +47,7 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Reviews list");
 		$this->view->description = $this->translator->translate("Here you can see all the reviews.");
-		$this->view->buttons = array(array("url" => "/admin/reviews/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/reviews/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( Reviews::grid() )->datagrid ();
 	}
 	
@@ -97,8 +97,8 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( "/admin/reviews/process" );
 		$this->view->title = $this->translator->translate("Reviews");
 		$this->view->description = $this->translator->translate("Here you can create a new review.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-							   array("url" => "/admin/reviews/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));		
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+							   array("url" => "/admin/reviews/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));		
 		$this->render ( 'applicantform' );
 	}
 
@@ -128,13 +128,13 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete the record selected?' );
-				$this->view->description = $this->translator->translate ( 'If you delete the bank information parameters the customers cannot pay you anymore with this method of payment' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete the selected record?' );
+				$this->view->description = $this->translator->translate ( 'If you delete the selected bank information, your customers will not be able to pay you with this method of payment' );
 	
 				$record = $this->reviews->find ( $id );
 				$this->view->recordselected = $record ['subject'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -153,9 +153,9 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/reviews/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/reviews/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/reviews/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/reviews/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -170,7 +170,7 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 				$this->view->data = array ('records' => $rs );
 			}
 			
-			$this->view->buttons[] = array("url" => "/admin/reviews/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+			$this->view->buttons[] = array("url" => "/admin/reviews/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 				
 		}
 		
@@ -193,9 +193,9 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/banks/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/banks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/banks/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/banks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -221,8 +221,8 @@ class Admin_ReviewsController extends Shineisp_Controller_Admin {
 		
 		} else {
 			$this->view->form = $form;
-			$this->view->title = $this->translator->translate("Review Details");
-			$this->view->description = $this->translator->translate("Here you can check all the submit information.");
+			$this->view->title = $this->translator->translate("Details of the reviews");
+			$this->view->description = $this->translator->translate("Here you can check the submitted information.");
 			return $this->render ( 'applicantform' );
 		}
 	}

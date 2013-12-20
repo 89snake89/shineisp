@@ -5,57 +5,60 @@ class Admin_Form_ServicesForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
         $this->addElement('text', 'date_start', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Creation date',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input date'
+            'label'      => $translate->_('Creation date'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control date',
+            'dateformat'      => Settings::getJsDateFormat()
         ));
         
         $this->addElement('text', 'date_end', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Expiring date',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input date'
+            'label'      => $translate->_('Expiry Date'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control date',
+            'dateformat'      => Settings::getJsDateFormat()
         ));   
 
         $this->addElement('text', 'quantity', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Quantity',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input'
+            'label'      => $translate->_('Quantity'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));           
         
         $this->addElement('textarea', 'message', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Message',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Message'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'col-lg-12 form-control wysiwyg'
         ));
         
         $this->addElement('textarea', 'note', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Note',
-            'description' => 'Write here a note. An email will be sent to the ISP staff.',
-            'decorators' => array('Composite'),
-            'class'      => 'textarea'
+            'label'      => $translate->_('Note'),
+            'description' => $translate->_('Write here a note. An email will be sent to the ISP staff.'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'col-lg-12 form-control wysiwyg'
         ));
         
         $this->addElement('textarea', 'setup', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Setup Configuration',
-            'description' => 'Here you can read the service configuration written by the ISP modules. These information are read-only.',
-            'decorators' => array('Composite'),
-            'class'      => 'textarea'
+            'label'      => $translate->_('Setup Configuration'),
+            'description' => $translate->_('Here you can read the service configuration written by the ISP modules. These information are read-only.'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'col-lg-12'
         ));
         
         $this->addElement('select', 'order_id', array(
-        'label' => 'Orders',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input'
+        'label' => $translate->_('Orders'),
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control'
         ));
         
         $this->getElement('order_id')
@@ -63,9 +66,9 @@ class Admin_Form_ServicesForm extends Zend_Form
                   ->setMultiOptions(Orders::getList(true));
                   
         $this->addElement('multiselect', 'domains', array(
-        'label' => 'Available domains',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input tmpitems'
+        'label' => $translate->_('Available domains'),
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control col-lg-12 tmpitems'
         ));
         
         $this->getElement('domains')
@@ -74,18 +77,18 @@ class Admin_Form_ServicesForm extends Zend_Form
                   ->setMultiOptions(Domains::getList()); 
 
         $this->addElement('multiselect', 'domains_selected', array(
-        'label' => 'Selected domains',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input items'
+        'label' => $translate->_('Selected domains'),
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control col-lg-12 items'
         ));        
 
         $this->getElement('domains_selected')
                   ->setRegisterInArrayValidator(false);  // Disable the Validator in order to manage a dynamic list.
 
         $this->addElement('select', 'product_id', array(
-        'label' => 'Products',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input'
+        'label' => $translate->_('Products'),
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control'
         ));
         
         $this->getElement('product_id')
@@ -93,9 +96,9 @@ class Admin_Form_ServicesForm extends Zend_Form
                   ->setMultiOptions(Products::getList(true));
 
         $this->addElement('select', 'billing_cycle_id', array(
-        'label' => 'Billing Cycle',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input'
+        'label' => $translate->_('Billing Cycle'),
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control'
         ));
         
         $this->getElement('billing_cycle_id')
@@ -103,9 +106,9 @@ class Admin_Form_ServicesForm extends Zend_Form
                   ->setMultiOptions(BillingCycle::getList(true));   
 
         $this->addElement('select', 'status_id', array(
-        'label' => 'Status',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input'
+        'label' => $translate->_('Status'),
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control'
         ));
         
         $this->getElement('status_id')
@@ -114,22 +117,15 @@ class Admin_Form_ServicesForm extends Zend_Form
         
 		$this->addElement('select', 'autorenew', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Autorenew',
-            'description' => 'Enable or disable the automatic renewal of the service',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Auto Renewal'),
+            'description' => $translate->_('Enable or disable the automatic renewal of the service'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('autorenew')
                   ->setAllowEmpty(false)
-                  ->setMultiOptions(array('1'=>'Yes, I would like to renew the service at the expiration date.', '0'=>'No, I am not interested in the service renew.'));
-				  
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
-        ));
+                  ->setMultiOptions(array('1'=> $translate->_('Yes, I would like to renew the service at the expiration date.'), '0'=> $translate->_('No, I am not interested in the service renew.')));
         
         $this->addElement('hidden', 'detail_id');
     }

@@ -116,11 +116,11 @@ class Shineisp_Controller_Action_Helper_Datagrid extends Zend_Controller_Action_
 							->setHasSubrecords ( $hassubrecords )
 							->setMassActions ( $massactions )
 							#->addCrudActions ( $buttons, $index )
-							->setFilter ( 'searchprocess' )
+// 							->setFilter ( 'searchprocess' )
 							->setBasePath ( $datagrid ['basepath'] )
 							->setRowlist ( $rowlist )
 							->setRownum ( $rowNum )
-							->addMultiselect ( $index )
+// 							->addMultiselect ( $index )
 							->setCurrentPage ( $page )
 							->setTitle ( $title );
 			
@@ -291,7 +291,7 @@ class Shineisp_Controller_Action_Helper_Datagrid extends Zend_Controller_Action_
 					die ( json_encode ( array ('mex' => $this->translator->translate ( "No item selected." ) ) ) );	
 				}
 			} else {
-				die ( json_encode ( array ('mex' => $this->translator->translate ( "The action requested has not been developed yet." ) ) ) );
+				die ( json_encode ( array ('mex' => $this->translator->translate ( "This feature has been not released yet" ) ) ) );
 			}
 		}
 		die ( json_encode ( array ('mex' => $this->translator->translate ( "Unable to process request at this time." ) ) ) );

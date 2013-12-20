@@ -32,7 +32,7 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 	public function indexAction() {
 		$id = $this->getRequest ()->getParam ( 'id' );
 		if(!is_numeric($id)){
-			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to find the order item selected.' ), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to find the order item selected.' ), 'status' => 'danger' ) );
 		}
 		$redirector = Zend_Controller_Action_HelperBroker::getStaticHelper ( 'redirector' );
 		$redirector->gotoUrl ( "/admin/ordersitems/edit/id/$id" );
@@ -50,13 +50,13 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete this item?' );
-				$this->view->description = $this->translator->translate ( 'If you delete this order all the data will be no more longer available.' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete this item?' );
+				$this->view->description = $this->translator->translate ( 'If you delete this order all the data will no longer be available.' );
 				
 				$record = $this->details->find ( $id, "description", true );
 				$this->view->recordselected = $record [0] ['description'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -77,6 +77,7 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 			if (! empty ( $details [0] ['order_id'] )) {
 				$record = Doctrine::getTable ( 'OrdersItems' )->find ( $id )->delete ();
 				$orderID = $details [0] ['order_id'];
+				Orders::updateTotalsOrder($orderID);
 				return $this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderID ) );
 			}
 			return $this->_helper->redirector ( 'list', 'orders', 'admin' );
@@ -91,14 +92,14 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 	 */
 	public function editAction() {
 		$form = $this->getForm ( '/admin/ordersitems/process' );
-		$form->getElement ( 'save' )->setLabel ( 'Update' );
+		
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/ordersitems/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/ordersitems/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/ordersitems/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/ordersitems/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -123,16 +124,16 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 				$this->view->isHosting = !empty($rs['Products']['type']) && $rs['Products']['type'] == "hosting" ? true : false;
 				
 				// Create the buttons in the edit form
-				$this->view->buttons[] = array("url" => "/admin/ordersitems/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/services/edit/id/$id", "label" => $this->translator->translate('Service'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/orders/edit/id/" . $rs['order_id'], "label" => $this->translator->translate('Order'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/customers/edit/id/" . $rs['Orders']['customer_id'], "label" => $this->translator->translate('Customers'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/ordersitems/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/services/edit/id/$id", "label" => $this->translator->translate('Service'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/orders/edit/id/" . $rs['order_id'], "label" => $this->translator->translate('Order'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/customers/edit/id/" . $rs['Orders']['customer_id'], "label" => $this->translator->translate('Customers'), "params" => array('css' => null));
 				
 			}else{
-				$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to find the order item selected.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to find the order item selected.' ), 'status' => 'danger' ) );
 			}
 		}else{
-			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to find the order item selected.' ), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to find the order item selected.' ), 'status' => 'danger' ) );
 		}
 		
 		
@@ -156,9 +157,9 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/ordersitems/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/ordersitems/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/ordersitems/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/ordersitems/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -175,7 +176,7 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 				
 				$this->_helper->redirector ( 'edit', 'ordersitems', 'admin', array ('id' => $params ['detail_id'], 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 			} catch ( Exception $e ) {
-				$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 			}
 		} else {
 			$this->view->form = $form;
@@ -215,7 +216,7 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 			$this->_helper->redirector ( 'edit', 'ordersitems', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 		}
 		
-		$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Service item has been not found.' ), 'status' => 'error' ) );
+		$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Service item not found.' ), 'status' => 'danger' ) );
 	}
 	
 	
@@ -246,7 +247,7 @@ class Admin_OrdersitemsController extends Shineisp_Controller_Admin {
 			
 			$this->_helper->redirector ( 'edit', 'ordersitems', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 		}else{
-			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Service item has been not found.' ), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'Service item not found.' ), 'status' => 'danger' ) );
 		}
 	}
 

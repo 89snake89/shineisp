@@ -44,9 +44,9 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 	 * @return datagrid
 	 */
 	public function listAction() {
-		$this->view->title = $this->translator->translate("Admin Roles list");
+		$this->view->title = $this->translator->translate("Admin Roles");
 		$this->view->description = $this->translator->translate("Here you can see all the roles.");
-		$this->view->buttons = array(array("url" => "/admin/roles/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/roles/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		
 		$this->datagrid->setConfig ( AdminRoles::grid() )->datagrid ();
 	}
@@ -97,9 +97,9 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 	public function newAction() {
 		$this->view->form = $this->getForm ( "/admin/roles/process" );
 		$this->view->title = $this->translator->translate("New Role");
-		$this->view->description = $this->translator->translate("Here you can create a new roles.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-								array("url" => "/admin/roles/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->description = $this->translator->translate("Here you can create new roles.");
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+								array("url" => "/admin/roles/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		
 		$this->render ( 'applicantform' );
 	}
@@ -130,13 +130,13 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete this role?' );
-				$this->view->description = $this->translator->translate ( 'The permision will be no more longer available and the users attached cannot use the resource.' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete this role?' );
+				$this->view->description = $this->translator->translate ( 'The permision will no longer be available and the users attached cannot use the resource.' );
 				
 				$record = $this->roles->find ( $id, null, true );
 				$this->view->recordselected = $record [0] ['AdminResources']['name'] . " (" . $record [0] ['AdminRoles']['name'] . " profile) " . $record [0]['AdminResources']['module'] . ":" . $record [0]['AdminResources']['controller'] . " = " . $record [0]['role'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -155,14 +155,13 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 		$aclConfig 	= new Zend_Config_Xml(APPLICATION_PATH . '/configs/acl.xml', 'acl');
 		
 		$form = $this->getForm ( '/admin/roles/process' );
-		$form->getElement ( 'save' )->setLabel ( 'Update' );
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/roles/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))),
-				array("url" => "/admin/roles/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/roles/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)),
+				array("url" => "/admin/roles/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -174,15 +173,15 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 				
 				// Load the roles of each resource
 				$roles = AdminPermissions::getPermissionByRoleID($id);
-				
+
 				// Load the resources
-				$this->view->resources = json_encode ( AdminResources::createResourcesTree ( $aclConfig->admin, $roles ) );
+				$this->view->resources = json_encode ( AdminResources::createResourcesTree ( $aclConfig->modules, $roles ) );
 				
 				// Join the roles and the users
 				$rs[0]['users'] = $users;
 				
 				$form->populate ( $rs[0] );
-				$this->view->buttons[] = array("url" => "/admin/roles/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/roles/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 			}
 		}
 		
@@ -207,9 +206,9 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/roles/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))),
-				array("url" => "/admin/roles/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/roles/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)),
+				array("url" => "/admin/roles/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -225,7 +224,7 @@ class Admin_RolesController extends Shineisp_Controller_Admin {
 			if($role){
 				$this->_helper->redirector ( 'edit', 'roles', 'admin', array ('id' => (string) $role->role_id, 'mex' => $this->translator->translate ( "The task requested has been executed successfully." ), 'status' => 'success' ) );
 			}else{
-				$this->_helper->redirector ( 'list', 'roles', 'admin', array ('mex' => $this->translator->translate ( "There was an error on save the data." ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', 'roles', 'admin', array ('mex' => $this->translator->translate ( "There was an error saving the data. Please try again." ), 'status' => 'danger' ) );
 			}
 		} else {
 			$this->view->form = $form;

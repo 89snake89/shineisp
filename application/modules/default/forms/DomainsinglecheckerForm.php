@@ -6,17 +6,17 @@ class Default_Form_DomainsinglecheckerForm extends Zend_Form
     {
         // Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
         $this->addElement('text', 'name', array(
             'filters'     => array('StringTrim'),
-            'decorators' => array('Composite'),
-            'class'       => 'domainame',
+            'decorators' => array('Bootstrap'),
+            'class'       => 'domainame form-control',
             'placeholder'       => 'mycompany',
-            'required'   => true
         ));
         
        $this->addElement('select', 'tld', array(
-        'decorators' => array('Composite'),
+        'decorators' => array('Bootstrap'),
         'class'      => 'tld'
         ));
         
@@ -25,8 +25,8 @@ class Default_Form_DomainsinglecheckerForm extends Zend_Form
                   ->setMultiOptions(DomainsTlds::getList(true));      
                           
         $this->addElement('submit', 'check', array(
-            'label'    => 'Check the domain',
-            'class'    => 'button small chkdomain'
+            'label'      => $translate->_('Check'),
+            'class'    => 'btn btn-default chkdomain'
         ));
 
     }

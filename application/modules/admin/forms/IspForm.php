@@ -5,191 +5,177 @@ class Admin_Form_IspForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
     	$this->addElement('text', 'company', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Company',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Company'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'vatnumber', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'VAT Number',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('VAT Number'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'address', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Address',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Address'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
         $this->addElement('text', 'zip', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'ZIP Code',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('ZIP Code'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
         $this->addElement('text', 'city', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'City',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('City'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
         $this->addElement('text', 'country', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Country',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Country'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
         $this->addElement('text', 'telephone', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Telephone',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Telephone'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
         $this->addElement('text', 'fax', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Fax',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Fax'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));     
 
         $this->addElement('text', 'bankname', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Bankname',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Bank name'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));     
 
         $this->addElement('text', 'iban', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'IBAN',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('IBAN'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));     
 
         $this->addElement('text', 'bic', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'BIC',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('BIC'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));     
 
         $this->addElement('text', 'slogan', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Slogan',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Slogan'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));     
 
         $this->addElement('text', 'manager', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Manager',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Manager'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));             
 
         $this->addElement('text', 'custom1', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Custom 1',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Custom 1'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));             
 
         $this->addElement('text', 'custom2', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Custom 2',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Custom 2'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));             
 
         $this->addElement('text', 'custom3', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Custom 3',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Custom 3'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));             
         
         $this->addElement('text', 'website', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Website',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Website'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'email', array(
             'filters'    => array('StringTrim', 'StringToLower'),
-            'decorators' => array('Composite'),
+            'decorators' => array('Bootstrap'),
             'validators' => array(
                 'EmailAddress',
             ),
             'required'   => true,
-            'label'      => 'Email',
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Email'),
+            'class'      => 'form-control'
         ));
                 
         $this->addElement('file', 'logo', array(
-            'label'      => 'Logo',
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Logo'),
         ));
                 
         $this->addElement('file', 'logo_email', array(
-            'label'      => 'Logo Email',
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Logo Email'),
         ));
         
         $this->addElement('password', 'password', array(
             'filters'    => array('StringTrim'),
-            'decorators' => array('Composite'),
+            'decorators' => array('Bootstrap'),
             'validators' => array(
                 array('regex', false, '/^[a-zA-Z0-9\-\_\.\%\!\$]{6,20}$/')
             ),
-            'label'      => 'Password',
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Password'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('select', 'isppanel', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'ISP Panel',
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('ISP Panel'),
+            'decorators'  => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->getElement('isppanel')
                   ->setAllowEmpty(false)
                   ->setMultiOptions(Panels::getPanelInstalled());            
-
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
-        ));
-        
-        $this->addElement('reset', 'reset', array(
-            'required' => false,
-            'label'    => 'reset',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
-        ));
         
         $this->addElement('hidden', 'isp_id');
     }

@@ -45,7 +45,7 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Invoice list");
 		$this->view->description = $this->translator->translate("Here you can see all the invoices.");
-		$this->view->buttons = array(array("url" => "/admin/invoices/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/invoices/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( Invoices::grid() )->datagrid ();
 	}
 	
@@ -96,8 +96,8 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( "/admin/invoices/process" );
 		$this->view->title = $this->translator->translate("New Invoice");
 		$this->view->description = $this->translator->translate("Create a new invoice using this form.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-							   array("url" => "/admin/invoices/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+							   array("url" => "/admin/invoices/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		$this->render ( 'applicantform' );
 	}
 	
@@ -113,12 +113,12 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete the invoice selected?' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete the invoice selected?' );
 				$this->view->description = $this->translator->translate ( 'The invoice will not be longer available' );
 				$record = $this->invoices->find ( $id );
 				$this->view->recordselected = $record ['number'] . " - " . Shineisp_Commons_Utilities::formatDateOut ( $record ['invoice_date'] );
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -146,7 +146,7 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 				$this->render ( 'confirm' );
 				
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -186,6 +186,38 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 		$product = Doctrine::getTable ( 'Products' )->find ( $id )->toArray ();
 		die ( json_encode ( $product ) );
 	}
+
+	/**
+	 * Search the record for the Select2 JQuery Object by ajax
+	 * @return json
+	 */
+	public function searchAction() {
+	
+	    if($this->getRequest()->isXmlHttpRequest()){
+	
+	        $term = $this->getParam('term');
+	        $id = $this->getParam('id');
+	
+	        if(!empty($term)){
+	            $term = "%$term%";
+	            $records = Invoices::findbyCustomFields("formatted_number LIKE ? OR number LIKE ?", array($term, $term));
+	            die(json_encode($records));
+	        }
+	
+	        if(!empty($id)){
+	            $records = Invoices::find($id);
+	            if($records){
+	                $records = $records->toArray();
+	            }
+	            die(json_encode(array($records)));
+	        }
+	
+	        $records = Invoices::getAll();
+	        die(json_encode($records));
+	    }else{
+	        die();
+	    }
+	}
 	
 	/**
 	 * editAction
@@ -194,7 +226,7 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 	 */
 	public function editAction() {
 		$form = $this->getForm ( '/admin/invoices/process' );
-		$form->getElement ( 'save' )->setLabel ( 'Update' );
+		
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -213,17 +245,17 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 				
 				// Create the buttons in the edit form
 				$this->view->buttons = array(
-						array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-						array("url" => "/admin/invoices/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right'))),
-						array("url" => "/admin/invoices/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-						array("url" => "/admin/invoices/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+						array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+						array("url" => "/admin/invoices/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null)),
+						array("url" => "/admin/invoices/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+						array("url" => "/admin/invoices/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 				);
 				
 				// Check if the order has been invoiced
-				$this->view->buttons[] = array("url" => "/admin/orders/sendinvoice/id/$id", "label" => $this->translator->translate('Email invoice'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/invoices/print/id/$id", "label" => $this->translator->translate('Print invoice'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/invoices/confirmoverwrite/id/$id", "label" => $this->translator->translate('Overwrite invoice'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/orders/edit/id/".$rs ['order_id'], "label" => $this->translator->translate('Order'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/orders/sendinvoice/id/$id", "label" => $this->translator->translate('Email invoice'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/invoices/print/id/$id", "label" => $this->translator->translate('Print invoice'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/invoices/confirmoverwrite/id/$id", "label" => $this->translator->translate('Overwrite invoice'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/orders/edit/id/".$rs ['order_id'], "label" => $this->translator->translate('Order'), "params" => array('css' => null));
 				
 				$form->populate ( $rs );
 			}
@@ -251,7 +283,7 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 				Invoices::setInvoice ( $request->id, $invoiceID );
 				$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 			} else {
-				$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'Already exist an invoice for this order.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'An invoice already exists for this order.' ), 'status' => 'danger' ) );
 			}
 		}
 	}
@@ -273,9 +305,9 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/invoices/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/invoices/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/invoices/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/invoices/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if ($form->isValid ( $request->getPost () )) {
@@ -307,7 +339,7 @@ class Admin_InvoicesController extends Shineisp_Controller_Admin {
 				}
 			
 			} catch ( Exception $e ) {
-				$this->_helper->redirector ( 'list', 'invoices', 'admin', array ('mex' => $this->translator->translate ( 'The invoice cannot be created. Please check all the data written.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', 'invoices', 'admin', array ('mex' => $this->translator->translate ( 'The invoice cannot be created. Please check all your input data and try again.' ), 'status' => 'danger' ) );
 			}
 			
 			$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );

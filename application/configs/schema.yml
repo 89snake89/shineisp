@@ -368,6 +368,8 @@ CmsPages:
       type: boolean(25)
       default: 1
       notnull: false
+    blog:
+      type: boolean(25)
     showonrss:
       type: boolean(25)
       default: '0'
@@ -780,7 +782,7 @@ Customers:
     lastname:
       type: string(100)
       notnull: false
-    sex:
+    gender:
       type: string(1)
       notnull: false
     email:
@@ -1470,6 +1472,9 @@ Files:
     path:
       type: string(200)
       notnull: true
+    publickey:
+      type: string(200)
+      notnull: true
     file:
       type: string(200)
       notnull: true
@@ -1480,6 +1485,10 @@ Files:
       primary: false
       notnull: true
       autoincrement: false
+    download:
+      type: integer(4)
+      notnull: true
+      default: 0
     id:
       type: integer(4)
       fixed: 0
@@ -1490,6 +1499,8 @@ Files:
     date:
       type: timestamp(25)
       notnull: true
+    lastdownload:
+      type: timestamp(25)
     ip:
       type: string(25)
       fixed: 0
@@ -2136,7 +2147,16 @@ OrdersItems:
     price:
       type: float(10)
       notnull: true
+    vat:
+      type: float(10)
+    subtotal:
+      type: float(10)
+    percentage:
+      type: float(10)
     setupfee:
+      type: float(10)
+      default: 0
+    discount:
       type: float(10)
       default: 0
     status_id:
@@ -2157,9 +2177,6 @@ OrdersItems:
     review_id: integer(4)
     parent_detail_id: integer(4)
     description: string()
-    callback_url:
-      type: string(200)
-      notnull: false
     uuid:
       type: string(50)
       notnull: false    

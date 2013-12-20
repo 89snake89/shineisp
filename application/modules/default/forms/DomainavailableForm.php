@@ -6,22 +6,23 @@ class Default_Form_DomainavailableForm extends Zend_Form
     {
     	// Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
 		$this->addElement('radio', 'options', array(
 		    'multiOptions'=>array(
-		        'register'=>'Register the domain selected',
-		        'donotregister'=>'Do not register this domain',
-		        'newdomain'=>'Choose a different domain',
+		        'register'=> $translate->_('Register the domain selected'),
+		        'donotregister'=> $translate->_('Do not register this domain'),
+		        'newdomain'=> $translate->_('Choose a different domain'),
 		      ),
-		      'decorators'  => array('Composite'),
+		      'decorators'  => array('Bootstrap'),
 		  ));
 		        
         
         $this->addElement('submit', 'continue', array(
             'required' => false,
-            'label'    => 'Continue Order',
-            'decorators'  => array('Composite'),
-            'class'    => 'button'
+            'label'      => $translate->_('Continue Order'),
+            'decorators'  => array('Bootstrap'),
+            'class'    => 'btn btn-primary'
         ));
 
     }

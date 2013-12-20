@@ -28,7 +28,7 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 	 * 
 	 * Executes the 'Purchase' command on the service's servers to register a new domain.
 	 * Note in order to not fail this command, it must meet the following requirements:
-	 * - Your account credencials must have enough credits to cover the order amount.
+	 * - Your account credentials must have enough credits to cover the order amount.
 	 * - The domain name must be valid and available.
 	 * - Name Servers must be valid and registered.
 	 * 
@@ -51,7 +51,7 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 		}
 		
 		// Get the registrar information
-		$registrar = Registrars::getActiveRegistrantbyClass(__CLASS__);	
+		$registrar = Registrars::getActiveRegistrarbyClass(__CLASS__);	
 			
 		if(empty($registrar)){
 			throw new Exception("Registrar __CLASS__ not found in database.");
@@ -202,7 +202,7 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 	 * 
 	 * Executes the 'Purchase' command on the service's servers to transfer the domain.
 	 * Note in order to not fail this command, it must meet the following requirements:
-	 * - Your account credencials must have enough credits to cover the order amount.
+	 * - Your account credentials must have enough credits to cover the order amount.
 	 * - To transfer EPP names, the query must include the authorization key from the Registrar.
 	 * - Name Servers must be valid and registered.
 	 * 
@@ -224,7 +224,7 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 		}
 		
 		// Get the registrar information
-		$registrar = Registrars::getActiveRegistrantbyClass(__CLASS__);		
+		$registrar = Registrars::getActiveRegistrarbyClass(__CLASS__);		
 		if(empty($registrar)){
 			throw new Exception("Registrar __CLASS__ not found in database.");
 		}
@@ -358,7 +358,7 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 		}
 		
 		// Get the registrar information
-		$registrar = Registrars::getActiveRegistrantbyClass(__CLASS__);		
+		$registrar = Registrars::getActiveRegistrarbyClass(__CLASS__);		
 		if(empty($registrar)){
 			throw new Exception("Registrar __CLASS__ not found in database.");
 		}
@@ -678,7 +678,7 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 	 * @access     private
 	 */	
 	private function Connect(){
-		$registrar = Registrars::getActiveRegistrantbyClass(__CLASS__);
+		$registrar = Registrars::getActiveRegistrarbyClass(__CLASS__);
 		
 		try {
 			
@@ -794,14 +794,14 @@ class Shineisp_Plugins_Registrars_Ascio_Main extends Shineisp_Plugins_Registrars
 		$soap = $this->Connect();
 		
 		if(!empty($this->session)){
-			$fields = "c.customer_id as customer_id, c.company as company, c.firstname as firstname, c.lastname as lastname, c.sex as sex, c.email as email, c.password as password, c.birthdate as birthdate, c.birthplace as birthplace, c.taxpayernumber as taxpayernumber, c.vat as vat, c.note as note,  a.address as address, a.code as code, a.city as city, a.area as area, ct.name as country, ct.code as countrycode, cts.type_id as type_id, cts.name as companytype, l.legalform_id as legalform_id, l.name as legalform, s.status_id as status_id, s.status as status, cn.contact as contact";
+			$fields = "c.customer_id as customer_id, c.company as company, c.firstname as firstname, c.lastname as lastname, c.gender as gender, c.email as email, c.password as password, c.birthdate as birthdate, c.birthplace as birthplace, c.taxpayernumber as taxpayernumber, c.vat as vat, c.note as note,  a.address as address, a.code as code, a.city as city, a.area as area, ct.name as country, ct.code as countrycode, cts.type_id as type_id, cts.name as companytype, l.legalform_id as legalform_id, l.name as legalform, s.status_id as status_id, s.status as status, cn.contact as contact";
 			$customer = Customers::getAllInfo($customerID, $fields);
 
 			return $soap->nicCreateIT ( 
 							$this->session['id'], // Session
 							$customer ['lastname'], // Lastname
 							$customer ['firstname'], // Firstname 
-							$customer ['sex'], // Sex
+							$customer ['gender'], // Gender
 							Shineisp_Commons_Utilities::GenerateRandomString(), // Password
 							$customer ['email'], // Email
 							$customer ['contact'], // Phone

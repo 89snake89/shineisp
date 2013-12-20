@@ -36,9 +36,9 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 	 * @return datagrid
 	 */
 	public function listAction() {
-		$this->view->title = $this->translator->translate("Attributes Groups");
-		$this->view->description = $this->translator->translate("Here you can see all the attributes groups.");
-		$this->view->buttons = array(array("url" => "/admin/productsattributesgroups/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->title = $this->translator->translate("Attribute Groups");
+		$this->view->description = $this->translator->translate("Here you can see all the attribute groups.");
+		$this->view->buttons = array(array("url" => "/admin/productsattributesgroups/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( ProductsAttributesGroups::grid() )->datagrid ();
 	}
 
@@ -88,8 +88,8 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 		$this->view->form = $this->getForm ( "/admin/productsattributesgroups/process" );
 		$this->view->title = $this->translator->translate("Attribute Group");
 		$this->view->description = $this->translator->translate("Here you can edit the attribute group details.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-									 array("url" => "/admin/productsattributesgroups/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+									 array("url" => "/admin/productsattributesgroups/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		
 		$this->render ( 'applicantform' );
 	}
@@ -116,8 +116,8 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you  sure to delete the feature selected?' );
-				$this->view->description = $this->translator->translate ( 'If you delete this feature, it will be no longer available.' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete the selected feature?' );
+				$this->view->description = $this->translator->translate ( 'If you delete this feature, it will no longer be available.' );
 				
 				$record = $this->productsattributesgroups->getAllInfo ( $id );
 				
@@ -127,7 +127,7 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
                 }
 				
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -153,14 +153,13 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 	public function editAction() {
 		$Session = new Zend_Session_Namespace ( 'Admin' );
 		$form = $this->getForm ( '/admin/productsattributesgroups/process' );
-		$form->getElement ( 'save' )->setLabel ( 'Update' );
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productsattributesgroups/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productsattributesgroups/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productsattributesgroups/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productsattributesgroups/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 				
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -173,7 +172,7 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 				$rs['attributes'] = ProductsAttributesGroups::getAttributes($id);
 				
 				$form->populate ( $rs );
-				$this->view->buttons[] = array("url" => "/admin/productsattributesgroups/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/productsattributesgroups/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 				
 			}
 		}
@@ -199,9 +198,9 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productsattributesgroups/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productsattributesgroups/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productsattributesgroups/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productsattributesgroups/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		try {
@@ -247,7 +246,7 @@ class Admin_ProductsattributesgroupsController extends Shineisp_Controller_Admin
 				return $this->render ( 'applicantform' );
 			}
 		} catch ( Exception $e ) {
-			$this->_helper->redirector ( 'edit', 'productsattributesgroups', 'admin', array ('id' => $id, 'mex' => $e->getMessage (), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'edit', 'productsattributesgroups', 'admin', array ('id' => $id, 'mex' => $e->getMessage (), 'status' => 'danger' ) );
 		}
 	}
 }

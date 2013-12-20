@@ -46,8 +46,8 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 	 */
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Services list");
-		$this->view->description = $this->translator->translate("Here you can see all the subscribed services list from the customers.");
-		$this->view->buttons = array(array("url" => "/admin/services/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->description = $this->translator->translate("Here you can see all the subscribed services list by the customers.");
+		$this->view->buttons = array(array("url" => "/admin/services/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( OrdersItems::grid() )->datagrid ();
 	}
 
@@ -97,8 +97,8 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( "/admin/services/process" );
 		$this->view->title = $this->translator->translate("New Service");
 		$this->view->description = $this->translator->translate("Create a new service");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-							   array("url" => "/admin/services/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+							   array("url" => "/admin/services/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		
 		$this->render ( 'applicantform' );
 	}
@@ -115,13 +115,13 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete the service selected?' );
-				$this->view->description = $this->translator->translate ( 'The service will no longer be recoverable' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete the service selected?' );
+				$this->view->description = $this->translator->translate ( 'The service will not be recoverable.' );
 				
 				$record = $this->services->find ( $id, null, true );
 				$this->view->recordselected = $record [0] ['description'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -155,14 +155,14 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 	public function editAction() {
 		$form = $this->getForm ( '/admin/services/process' );
 		$service_domains = new OrdersItemsDomains ( );
-		$form->getElement ( 'save' )->setLabel ( 'Update' );
+		
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/services/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/services/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/services/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/services/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		try {
@@ -177,13 +177,13 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 					$rs ['date_end'] = Shineisp_Commons_Utilities::formatDateOut ( $rs ['date_end'] );
 					$rs ['customer_id'] = $rs ['Orders']['customer_id'];
 					$form->populate ( $rs );
-					$this->view->buttons[] = array("url" => "/admin/services/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
-					$this->view->buttons[] = array("url" => "/admin/orders/edit/id/" .  $rs ['Orders']['order_id'], "label" => $this->translator->translate('Order'), "params" => array('css' => array('button', 'float_right')));
+					$this->view->buttons[] = array("url" => "/admin/services/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
+					$this->view->buttons[] = array("url" => "/admin/orders/edit/id/" .  $rs ['Orders']['order_id'], "label" => $this->translator->translate('Order'), "params" => array('css' => null));
 						
 				}
 				
 				// Get all the messages attached to the ordersitems
-				$this->view->messages = Messages::find ( 'detail_id', $id, true );
+				$this->view->messages = Messages::getbyServiceId ( $id );
 				$this->view->owner_datagrid = $this->ownerGrid ( $rs ['Orders'] ['customer_id'] );
 			}
 		} catch ( Exception $e ) {
@@ -191,7 +191,7 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 		}
 		
 		$this->view->title = $this->translator->translate("Service Details");
-		$this->view->description = $this->translator->translate("Here you can see the datails of the service subscribed by the customer.");
+		$this->view->description = $this->translator->translate("Here you can see the details of the service subscribed by the customer.");
 		
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
@@ -228,9 +228,9 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/services/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/services/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/services/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/services/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -302,14 +302,14 @@ class Admin_ServicesController extends Shineisp_Controller_Admin {
 				$this->_helper->redirector ( 'edit', 'services', 'admin', array ('id' => $id, 'mex' => 'The task requested has been executed successfully.', 'status' => 'success' ) );
 			
 			} catch ( Exception $e ) {
-				$this->_helper->redirector ( 'edit', 'services', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'edit', 'services', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 			}
 			
 			$redirector->gotoUrl ( "/admin/services/edit/id/$id" );
 		} else {
 			$this->view->form = $form;
 			$this->view->title = $this->translator->translate("Service Details");
-            $this->view->description = $this->translator->translate("Here you can see the datails of the service subscribed by the customer.");
+            $this->view->description = $this->translator->translate("Here you can see the details of the service subscribed by the customer.");
 			return $this->render ( 'applicantform' );
 		}
 	}

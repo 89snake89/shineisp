@@ -89,6 +89,7 @@ class Shineisp_Controller_Action_Helper_Ajaxgrid extends Zend_Controller_Action_
 							->addColumns ( $datagrid ['columns'] )
 							->setScriptOptions( $jsoption )
 							->setJsinject( $jsinject )
+							->setAutoWidth(false)
 							->setMassactions($massactions)
 							->setStatuses($statuses)
 							->addBulkActions()
@@ -104,7 +105,7 @@ class Shineisp_Controller_Action_Helper_Ajaxgrid extends Zend_Controller_Action_
 			$this->view->$placeholder = $mygrid->create();
 			
 			// Adding the script 
-			$this->view->placeholder ("admin_htmlhead" )->append ($mygrid->getScript());
+			$this->view->placeholder ("admin_endbody" )->append ($mygrid->getScript());
 			
 		} catch ( Exception $e ) {
 			unset($this->session->$controller->filters);
@@ -154,7 +155,7 @@ class Shineisp_Controller_Action_Helper_Ajaxgrid extends Zend_Controller_Action_
 					die ( json_encode ( array ('mex' => $this->translator->translate ( "No item selected." ) ) ) );	
 				}
 			} else {
-				die ( json_encode ( array ('mex' => $this->translator->translate ( "The action requested has not been developed yet." ) ) ) );
+				die ( json_encode ( array ('mex' => $this->translator->translate ( "This feature has been not released yet" ) ) ) );
 			}
 		}
 		die ( json_encode ( array ('mex' => $this->translator->translate ( "Unable to process request at this time." ) ) ) );

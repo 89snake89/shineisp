@@ -58,7 +58,7 @@ class OrdersController extends Shineisp_Controller_Default {
 		try {
 			$page = ! empty ( $page ) && is_numeric ( $page ) ? $page : 1;
 			$data = $this->orders->findAll ( "o.order_id, 
-												i.formatted_number as Invoice, 
+												in.formatted_number as Invoice, 
 												CONCAT(c.company, ' ', c.firstname,' ', c.lastname) as company, 
 												o.order_number as order_number,
 												o.order_date as start_date,
@@ -81,15 +81,15 @@ class OrdersController extends Shineisp_Controller_Default {
 		$data ['columns'][] = $this->translator->translate('Invoice No.');
 		$data ['columns'][] = $this->translator->translate('Company');
 		$data ['columns'][] = $this->translator->translate('Order No.');
-		$data ['columns'][] = $this->translator->translate('Created at');
+		$data ['columns'][] = $this->translator->translate('Creation Date');
 		$data ['columns'][] = $this->translator->translate('Total');
 		$data ['columns'][] = $this->translator->translate('Status');
 		
 		$this->view->headTitle()->prepend ($this->translator->translate('Orders List'));
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
-		$this->view->title = $this->translator->translate("Orders List");
-		$this->view->description = $this->translator->translate("This is the list of all your orders.");
+		$this->view->title = "Orders List";
+		$this->view->description = "This is the list of all your orders.";
 		$this->view->orders = $data;
 	}
 	
@@ -121,7 +121,6 @@ class OrdersController extends Shineisp_Controller_Default {
 							o.grandtotal as Grandtotal";
 				
 				$rs = Orders::getAllInfo ( $id, $fields, true, $NS->customer ['customer_id'] );
-				
 				if (! empty ( $rs )) {
 					
 					// Check the status of the order. 
@@ -141,27 +140,47 @@ class OrdersController extends Shineisp_Controller_Default {
 						$this->view->tobepaid = true; // To be Paid status 
 					}
 					
-					$records = OrdersItems::getAllDetails ( $id, "oi.detail_id, oi.description as description, DATE_FORMAT(oi.date_end, '%d/%m/%Y') as expiration_date, oi.quantity as quantity, oi.price as price, bc.name as billingcycle, oi.setupfee as setupfee", true );
+					$records = OrdersItems::getAllDetails ( $id, "oi.detail_id, 
+                                        					        oi.description as description, 
+                                        					        DATE_FORMAT(oi.date_end, '%d/%m/%Y') as expiration_date, 
+                                        					        oi.quantity as quantity, 
+                                        					        oi.price as price, 
+                                        					        CONCAT(oi.discount, '%') as discount, 
+                                        					        oi.subtotal as subtotal, 
+                                        					        bc.name as billingcycle, 
+                                        					        oi.setupfee as setupfee", true );
+					
 					for ($i=0; $i<count($records); $i++){
 						$records[$i]['price'] = $currency->toCurrency($records[$i]['price'], array('currency' => Settings::findbyParam('currency')));;
+						$records[$i]['subtotal'] = $currency->toCurrency($records[$i]['subtotal'], array('currency' => Settings::findbyParam('currency')));;
 						$records[$i]['setupfee'] = $currency->toCurrency($records[$i]['setupfee'], array('currency' => Settings::findbyParam('currency')));;
 					}
+					
+					$columns = array();
+					$columns[] = $this->translator->translate('Description');
+					$columns[] = $this->translator->translate('Expiry Date');
+					$columns[] = $this->translator->translate('Qty');
+					$columns[] = $this->translator->translate('Price');
+					$columns[] = $this->translator->translate('Discount');
+					$columns[] = $this->translator->translate('Subtotal');
+					$columns[] = $this->translator->translate('Billing Cycle');
+					$columns[] = $this->translator->translate('Setup Fee');
 
 					$this->view->customer_id = $NS->customer ['customer_id'];
 					$this->view->invoiced = ($rs [0] ['status_id'] == Statuses::id("complete", "orders") && $rs [0] ['invoice_number'] > 0) ? true : false;
 					$this->view->invoice_id = $rs [0] ['invoice_id'];
 					$this->view->order = array ('records' => $rs );
-					$this->view->details = array ('records' => $records );
+					$this->view->details = array ('records' => $records, 'columns' => $columns );
 					
 					// Get Order status history
 					$this->view->statushistory = StatusHistory::getStatusList($id);
 					
 					// Show the list of the messages attached to this domain
-					$this->view->messages = Messages::find ( 'order_id', $id, true );
+					$this->view->messages = Messages::getbyOrderId($id);
 					
 					$this->view->headTitle()->prepend ($this->translator->_('Order %s', $rs [0]['order_number']));
 					
-					$rsfiles = Files::findbyExternalId ( $id, "orders", "file, Date_Format(date, '%d/%m/%Y') as date" );
+					$rsfiles = Files::findbyExternalId ( $id, "orders", "file, Date_Format(date, '%d/%m/%Y') as date, fc.name as categoryname, publickey, download" );
 					if (isset ( $rsfiles [0] )) {
 						$this->view->files = $rsfiles;
 					}
@@ -316,7 +335,7 @@ class OrdersController extends Shineisp_Controller_Default {
 			Orders::pdf($id, false, true);
 			$this->_helper->redirector ( 'index', 'orders', 'default', array ('mex' => 'The requested task has been completed successfully', 'status' => 'success' ) );
 		}else{
-			$this->_helper->redirector ( 'index', 'orders', 'default', array ('mex' => 'An error has occured during the task requested.', 'status' => 'error' ) );
+			$this->_helper->redirector ( 'index', 'orders', 'default', array ('mex' => 'An error occurred during the task execution.', 'status' => 'danger' ) );
 		}
 	}
 	
@@ -374,13 +393,13 @@ class OrdersController extends Shineisp_Controller_Default {
 			$cvs = Shineisp_Commons_Utilities::cvsExport ( $service );
 			die ( json_encode ( array ('mex' => '<a href="/public/documents/export.csv">' . $registry->Zend_Translate->translate ( "download" ) . '</a>' ) ) );
 		}
-		die ( json_encode ( array ('mex' => $this->translator->translate ( "exporterror" ) ) ) );
+		die ( json_encode ( array ('mex' => $this->translator->translate ( "There was a problem during the export process" ) ) ) );
 	}
 	
 	/*
-     *  bulkAction
      *  Execute a custom function for each item selected in the list
      *  this method will be call from a jQuery script 
+     *  
      *  @return string
      */
 	public function bulkAction() {
@@ -395,10 +414,10 @@ class OrdersController extends Shineisp_Controller_Default {
 					die ( json_encode ( array ('mex' => $this->translator->translate ( "The task requested has been executed successfully." ) ) ) );
 				}
 			} else {
-				die ( json_encode ( array ('mex' => $this->translator->translate ( "methodnotset" ) ) ) );
+				die ( json_encode ( array ('mex' => $this->translator->translate ( "This feature has been not released yet" ) ) ) );
 			}
 		}
-		die ( json_encode ( array ('mex' => $this->translator->translate ( "An error has occured during the task requested." ) ) ) );
+		die ( json_encode ( array ('mex' => $this->translator->translate ( "An error occurred during the task execution." ) ) ) );
 	}
 	
 	/**
@@ -425,7 +444,7 @@ class OrdersController extends Shineisp_Controller_Default {
 	public function createinvoiceAction() {
 		$NS = new Zend_Session_Namespace ( 'Default' );
 		if(empty($NS->customer ['customer_id'])){
-			$this->_helper->redirector ( 'index', 'index', 'default', array ('mex' => 'There was an error. The invoice selected has not been found.', 'status' => 'error' ) );
+			$this->_helper->redirector ( 'index', 'index', 'default', array ('mex' => 'There was an error. The invoice selected has not been found.', 'status' => 'danger' ) );
 		}
 		$request = Zend_Controller_Front::getInstance ()->getRequest ();
 		try {
@@ -525,7 +544,7 @@ class OrdersController extends Shineisp_Controller_Default {
 			
 			}
 		}
-		$this->_helper->redirector ( 'list', 'orders', 'default', array ('mex' => 'There was a problem during the payment process.', 'status' => 'error' ) );
+		$this->_helper->redirector ( 'list', 'orders', 'default', array ('mex' => 'There was a problem during the payment process.', 'status' => 'danger' ) );
 	}
 	
 	/**
@@ -540,7 +559,7 @@ class OrdersController extends Shineisp_Controller_Default {
 			header('location: ' . $filename);
 			die;
 		}else{
-			$this->_helper->redirector ( 'list', 'orders', 'default', array ('mex' => 'No invoices have been found.', 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'orders', 'default', array ('mex' => 'No invoices have been found.', 'status' => 'danger' ) );
 		}
 	}
 }

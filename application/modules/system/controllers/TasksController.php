@@ -3,7 +3,7 @@
 
 /**
 	* This procedure is executed by cronjob every 5 minutes and it will register,
-	* transfer a domain name using the default registrant
+	* transfer a domain name using the default registrar
 	* Remember to set the points value for each domain name.
 	*
 	* CREATE A SYSTEM CRONJOB EACH 5 MINUTES
@@ -129,7 +129,7 @@ class System_TasksController extends Shineisp_Controller_Default {
 			}
 			
 			// Update the log description of the panel action
-			PanelsActions::UpdateTaskLog ( $task ['action_id'], $this->translations->translate ( "The request has been executed correctly." ) );
+			PanelsActions::UpdateTaskLog ( $task ['action_id'], $this->translations->translate ( "Your request has been executed." ) );
 			
 			// Update the status of the task
 			PanelsActions::UpdateTaskStatus ( $task ['action_id'], Statuses::id('complete', 'domains_tasks') ); // Set the task as "Complete"
@@ -153,10 +153,10 @@ class System_TasksController extends Shineisp_Controller_Default {
 		$tasks = DomainsTasks::getTasks ( Statuses::id('active', 'domains_tasks'), 20 );
 		
 		// Check if an active registrar is active
-		$registrant = Registrars::findActiveRegistrars ();
+		$registrar = Registrars::findActiveRegistrars ();
 		
-		// If exist a registrant set in the database
-		if (isset ( $registrant [0] )) {
+		// If exist a registrar set in the database
+		if (isset ( $registrar [0] )) {
 			
 			// Check all the tasks saved within the Domains_Tasks table. 
 			foreach ( $tasks as $task ) {
@@ -197,7 +197,7 @@ class System_TasksController extends Shineisp_Controller_Default {
 			if (! empty ( $domain [0] )) {
 				
 				// Get the associated registrar for the domain selected 
-				$registrar = Registrars::getRegistrantId ( $task ['registrars_id'] );
+				$registrar = Registrars::getRegistrarId ( $task ['registrars_id'] );
 				
 				if (! empty ( $registrar ['class'] )) {
 					
@@ -252,7 +252,7 @@ class System_TasksController extends Shineisp_Controller_Default {
 					}
 					
 					// Update the log description of the task
-					DomainsTasks::UpdateTaskLog ( $task ['task_id'], $this->translations->translate ( "The request has been executed correctly." ) );
+					DomainsTasks::UpdateTaskLog ( $task ['task_id'], $this->translations->translate ( "Your request has been executed." ) );
 					
 					// Update the status of the task
 					DomainsTasks::UpdateTaskStatus ( $task ['task_id'], Statuses::id('complete', 'domains_tasks') ); // Set the task as "Complete"

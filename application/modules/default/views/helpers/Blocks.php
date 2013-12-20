@@ -51,7 +51,7 @@ class Zend_View_Helper_Blocks extends Zend_View_Helper_Abstract {
 		$controller = Zend_Controller_Front::getInstance ()->getRequest ()->getControllerName ();
 		$action = Zend_Controller_Front::getInstance ()->getRequest ()->getActionName ();
 		$customskin = Settings::findbyParam ( 'skin' );
-		$skin = !empty($customskin) ? $customskin : "base";
+		$skin = !empty($customskin) ? $customskin : "blank";
 		
 		// call the placeholder view helper for each side parsed 
 		echo $this->view->placeholder ( $side );
@@ -63,12 +63,14 @@ class Zend_View_Helper_Blocks extends Zend_View_Helper_Abstract {
 		// If the controller called is the homepage, event detail page or a cms page ...
 		// #################
 		if ($controller == "index") {
-			
 			$record = CmsPages::findbyvar ( 'homepage', $ns->lang );
 			$var = Zend_Controller_Front::getInstance ()->getRequest ()->getParam ( 'url' );
 			if (! empty ( $var )) {
 				$record = CmsPages::findbyvar ( $var, $ns->lang );
 			}
+		}elseif ($controller == "cms"){
+		    $var = Zend_Controller_Front::getInstance ()->getRequest ()->getParam ( 'url' );
+		    $record = CmsPages::findbyvar ( $var, $ns->lang );
 		}
 		
 		// Load the xml found in the recordset
@@ -108,6 +110,10 @@ class Zend_View_Helper_Blocks extends Zend_View_Helper_Abstract {
 			foreach ( $blocks ['reference'] as $block ) {
 				$this->Iterator ( $block, $side );
 			}
+		}
+		
+		if (Settings::findbyParam('debug')){
+		    echo "<div class=\"alert alert-info\"><h4>$side <small>($skin)</small></h4>Path: $module/$controller/$action</div>";
 		}
 		
 		$this->view->module = $module;

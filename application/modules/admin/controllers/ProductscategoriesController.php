@@ -46,7 +46,7 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Product Category list");
 		$this->view->description = $this->translator->translate("Here you can see all the product categories.");
-		$this->view->buttons = array(array("url" => "/admin/productscategories/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/productscategories/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( ProductsCategories::grid() )->datagrid ();
 	}
 
@@ -96,8 +96,8 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( "/admin/productscategories/process" );
 		$this->view->title = $this->translator->translate("New Category");
 		$this->view->description = $this->translator->translate("Add here a new product category");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-									 array("url" => "/admin/productscategories/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+									 array("url" => "/admin/productscategories/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		$this->render ( 'applicantform' );
 	}
 	
@@ -114,12 +114,12 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
                 $this->view->back = "/admin/$controller/edit/id/$id";
                 $this->view->goto = "/admin/$controller/delete/id/$id";
                 $this->view->title = $this->translator->translate ( 'Do you want delete this category?' );
-                $this->view->description = $this->translator->translate ( 'If you delete the record, the category is no longer available.' );
+                $this->view->description = $this->translator->translate ( 'If you delete this record, the category will no longer be available.' );
                 
                 $record = $this->productscategories->find ( $id);
                 $this->view->recordselected = $record [0] ['name'];
             } else {
-                $this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+                $this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
             }
         } catch ( Exception $e ) {
             echo $e->getMessage ();
@@ -136,7 +136,7 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 		try {
 			$this->productscategories->find ( $id )->delete ();
 		} catch ( Exception $e ) {
-			$this->_helper->redirector ( 'list', 'productscategories', 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'productscategories', 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 		}
 		return $this->_helper->redirector ( 'list', 'productscategories', 'admin' );
 	}
@@ -154,9 +154,9 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productscategories/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productscategories/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productscategories/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productscategories/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -174,7 +174,7 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 				$rs ['products'] = $prodselected;
 				$form->populate ( $rs );	
 				
-				$this->view->buttons[] = array("url" => "/admin/productscategories/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/productscategories/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 				
 			}
 		}
@@ -202,9 +202,9 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productscategories/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/productscategories/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productscategories/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/productscategories/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -230,7 +230,7 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 				$this->_helper->redirector ( 'edit', 'productscategories', 'admin', array ('id' => $id, 'mex' => 'The task requested has been executed successfully.', 'status' => 'success' ) );
 			
 			} catch ( Exception $e ) {
-				$this->_helper->redirector ( 'edit', 'productscategories', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'edit', 'productscategories', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 			}
 			
 			$redirector->gotoUrl ( "/admin/productscategories/edit/id/$id" );
@@ -240,6 +240,35 @@ class Admin_ProductscategoriesController extends Shineisp_Controller_Admin {
 			$this->view->description = $this->translator->translate("Here you can edit the product category.");
 			return $this->render ( 'applicantform' );
 		}
+	}
+
+	/**
+	 * Search the record for the Select2 JQuery Object by ajax
+	 * @return json
+	 */
+	public function searchAction() {
+	     
+	    if($this->getRequest()->isXmlHttpRequest()){
+	         
+	        $term = $this->getParam('term');
+	        $id = $this->getParam('id');
+	        	
+	        if(!empty($term)){
+	            $term = "%$term%";
+	            $records = ProductsCategories::findbyName("(name LIKE ?)", $term);
+	            die(json_encode($records));
+	        }
+	        	
+	        if(!empty($id)){
+	            $records = ProductsCategories::get_by_id($id);
+	            die(json_encode($records));
+	        }
+	        	
+	        $records = ProductsCategories::getAll();
+	        die(json_encode($records));
+	    }else{
+	        die();
+	    }
 	}
 	
 	/**

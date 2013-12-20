@@ -5,20 +5,22 @@ class Admin_Form_CreditNotesForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
     	$this->addElement('text', 'creationdate', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Date',
-            'title'      => 'es: 01/11/2010',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input date'
+            'label'      => $translate->_('Date'),
+            'title'      => $translate->_('eg: 01/11/2010'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control date',
+            'dateformat'      => Settings::getJsDateFormat()
         ));
         
         $this->addElement('select', 'invoice_id', array(
-            'label'      => 'Invoice',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Invoice'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->getElement('invoice_id')
@@ -28,37 +30,37 @@ class Admin_Form_CreditNotesForm extends Zend_Form
     	$this->addElement('text', 'number', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Number',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input'
+            'label'      => $translate->_('Number'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'total_net', array(
             'filters'    => array('StringTrim', 'LocalizedToNormalized'),
-            'label'      => 'Total Net',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input'
+            'label'      => $translate->_('Total Net'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'total_vat', array(
             'filters'    => array('StringTrim', 'LocalizedToNormalized'),
-            'label'      => 'Total VAT',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input'
+            'label'      => $translate->_('Total VAT'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'total', array(
             'filters'    => array('StringTrim', 'LocalizedToNormalized'),
-            'label'      => 'Total',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input'
+            'label'      => $translate->_('Total'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('textarea', 'note', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Note',
-            'decorators' => array('Composite'),
-            'class'      => 'textarea little-input'
+            'label'      => $translate->_('Note'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'col-lg-12 form-control'
         ));
         
         
@@ -66,37 +68,37 @@ class Admin_Form_CreditNotesForm extends Zend_Form
         
         $this->addElement('text', 'quantity', array(
             'filters'    => array('StringTrim', 'LocalizedToNormalized'),
-            'label'      => 'Quantity',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Quantity'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'description', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Description',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Description'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'vat', array(
             'filters'    => array('StringTrim', 'LocalizedToNormalized'),
-            'label'      => 'VAT',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('VAT'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'price', array(
             'filters'    => array('StringTrim', 'LocalizedToNormalized'),
-            'label'      => 'Price',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Price'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('submit', 'save', array(
             'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+            'label'    => $translate->_('Save'),
+            'decorators' => array('Bootstrap'),
+            'class'    => 'btn'
         ));
         
         $this->addElement('hidden', 'creditnote_id');

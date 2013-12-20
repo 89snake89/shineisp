@@ -11,30 +11,31 @@ class Admin_Form_ProfileForm extends Zend_Form
     	
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
     	$this->addElement('text', 'firstname', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Firstname',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Firstname'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
     	
     	$this->addElement('text', 'lastname', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Lastname',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Lastname'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
     	
     	// Check if the user is an administrator, if not the select role object will become an hidden field
     	if(AdminRoles::isAdministrator($logged_user['user_id'])){
     		$this->addElement('select', 'role_id', array(
     				'required'   => true,
-    				'label'      => 'Role',
-    				'decorators' => array('Composite'),
-    				'class'      => 'text-input large-input'
+    				'label'      => $translate->_('Role'),
+    				'decorators' => array('Bootstrap'),
+    				'class'      => 'form-control'
     		));
     		
     		$this->getElement('role_id')
@@ -44,9 +45,9 @@ class Admin_Form_ProfileForm extends Zend_Form
     		
     		$this->addElement('select', 'isp_id', array(
     				'required'   => true,
-    				'label'      => 'Isp Company',
-    				'decorators' => array('Composite'),
-    				'class'      => 'text-input large-input'
+    				'label'      => $translate->_('Isp Company'),
+    				'decorators' => array('Bootstrap'),
+    				'class'      => 'form-control'
     		));
     		
     		$this->getElement('isp_id')
@@ -60,37 +61,23 @@ class Admin_Form_ProfileForm extends Zend_Form
     	
         $this->addElement('text', 'email', array(
             'filters'    => array('StringTrim', 'StringToLower'),
-            'decorators' => array('Composite'),
+            'decorators' => array('Bootstrap'),
         	'validators' => array(
         						array('validator' => 'EmailAddress'),  
         					),
             'required'   => true,
-            'label'      => 'Email',
-            'class'      => 'text-input large-input'
-        ));
-        
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
-        ));
-        
-        $this->addElement('reset', 'reset', array(
-            'required' => false,
-            'label'    => 'reset',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+            'label'      => $translate->_('Email'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('password', 'password', array(
         		'filters'    => array('StringTrim'),
-        		'decorators' => array('Composite'),
+        		'decorators' => array('Bootstrap'),
         		'validators' => array(
         				array('regex', false, '/^[a-zA-Z0-9\-\_\.\%\!\$]{6,20}$/')
         		),
-        		'label'      => 'Password',
-        		'class'      => 'text-input large-input'
+        		'label'      => $translate->_('Password'),
+        		'class'      => 'form-control'
         ));
         
         $this->addElement('hidden', 'user_id');

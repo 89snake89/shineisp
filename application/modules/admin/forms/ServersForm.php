@@ -5,11 +5,12 @@ class Admin_Form_ServersForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
     	$this->addElement('select', 'isp_id', array(
-                'label' => 'isp',
-                'decorators' => array('Composite'),
-                'class'      => 'text-input large-input'
+                'label' => $translate->_('Isp'),
+                'decorators' => array('Bootstrap'),
+                'class'      => 'form-control'
         ));
         
         $this->getElement('isp_id')
@@ -18,9 +19,9 @@ class Admin_Form_ServersForm extends Zend_Form
                   ->setRequired(true);
                   
         $this->addElement('select', 'type_id', array(
-                'label' => 'servertype',
-                'decorators' => array('Composite'),
-                'class'      => 'text-input large-input'
+                'label' => $translate->_('Server Type'),
+                'decorators' => array('Bootstrap'),
+                'class'      => 'form-control'
         ));
         
         $this->getElement('type_id')
@@ -29,9 +30,9 @@ class Admin_Form_ServersForm extends Zend_Form
                   ->setRequired(true);
                   
         $this->addElement('select', 'status_id', array(
-                'label' => 'status',
-                'decorators' => array('Composite'),
-                'class'      => 'text-input large-input'
+                'label' => $translate->_('Status'),
+                'decorators' => array('Bootstrap'),
+                'class'      => 'form-control'
         ));
         
         $this->getElement('status_id')
@@ -42,55 +43,56 @@ class Admin_Form_ServersForm extends Zend_Form
     	$this->addElement('text', 'name', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'servername',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Server Name'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'ip', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'ip',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('IP'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'netmask', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'netmask',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Netmask'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'host', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'host',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Host'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('text', 'domain', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'domain',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Domain'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->addElement('textarea', 'description', array(
             'required'   => true,
-            'label'      => 'description',
-            'decorators' => array('Composite'),
-            'class'      => 'textarea large-input'
+            'label'      => $translate->_('Description'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'col-lg-12 form-control'
         ));
         
 		
         $this->addElement('select', 'panel_id', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Control Panel',
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Control Panel'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         $this->getElement('panel_id')
                   ->setAllowEmpty(false)
@@ -99,42 +101,42 @@ class Admin_Form_ServersForm extends Zend_Form
         $this->addElement('text', 'datacenter', array(
             'filters'    => array('StringTrim'),
             'required'   => false,
-            'label'      => 'Datacenter',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Datacenter'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 		
         $this->addElement('text', 'cost', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Server cost',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Server cost'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 		
         $this->addElement('text', 'max_accounts', array(
             'filters'    => array('StringTrim'),
             'required'   => false,
-            'label'      => 'Max accounts',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Max accounts'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 		
         $this->addElement('text', 'buy_date', array(
             'filters'     => array('StringTrim'),
-            'label'       => 'Buy Date',
-            'description' => 'Purchase date of this server',
-            'decorators'  => array('Composite'),
-            'class'       => 'text-input large-input date'
+            'label'       => $translate->_('Buy Date'),
+            'description' => $translate->_('Purchase date of this server'),
+            'decorators'  => array('Bootstrap'),
+            'class'       => 'form-control date'
         ));		
 		
         $this->addElement('checkbox', 'is_default', array(
             'filters'     => array('StringTrim'),
             'required'    => false,
-            'label'       => 'Default server',
-            'description' => 'Default server for the group',
-            'decorators'  => array('Composite'),
-            'class'       => 'text-input large-input'
+            'label'       => $translate->_('Default server'),
+            'description' => $translate->_('Default server for the group'),
+            'decorators'  => array('Bootstrap'),
+            'class'       => 'form-control'
         ));
 
         $this->addElement('hidden', 'server_id');

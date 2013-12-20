@@ -15,6 +15,7 @@ Doctrine_Manager::getInstance()->bindComponent('CmsPages', 'doctrine');
  * @property string $pagelayout
  * @property string $var
  * @property boolean $showinmenu
+ * @property boolean $blog
  * @property boolean $showonrss
  * @property boolean $active
  * @property integer $parent_id
@@ -75,6 +76,10 @@ abstract class BaseCmsPages extends Doctrine_Record
              'type' => 'boolean',
              'default' => 1,
              'notnull' => false,
+             'length' => '25',
+             ));
+        $this->hasColumn('blog', 'boolean', 25, array(
+             'type' => 'boolean',
              'length' => '25',
              ));
         $this->hasColumn('showonrss', 'boolean', 25, array(

@@ -44,9 +44,9 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 	 * @return datagrid
 	 */
 	public function listAction() {
-		$this->view->title = $this->translator->translate("Registrant Modules");
-		$this->view->description = $this->translator->translate("Here you can see all the registrant module.");
-		$this->view->buttons = array(array("url" => "/admin/registrars/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->title = $this->translator->translate("Registrar Modules");
+		$this->view->description = $this->translator->translate("Here you can see all the registrar module.");
+		$this->view->buttons = array(array("url" => "/admin/registrars/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( Registrars::grid() )->datagrid ();
 	}
 	
@@ -94,11 +94,11 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 	 */
 	public function newAction() {
 		$this->view->form = $this->getForm ( "/admin/registrars/process" );
-		$this->view->title = $this->translator->translate("New Registrant Modules");
-		$this->view->description = $this->translator->translate("Here you can create a new registrant module.");
+		$this->view->title = $this->translator->translate("New Registrar");
+		$this->view->description = $this->translator->translate("Here you can create a new registrar.");
 		
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-									 array("url" => "/admin/registrars/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+									 array("url" => "/admin/registrars/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		
 		$this->render ( 'applicantform' );
 	}
@@ -128,13 +128,13 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete the record selected?' );
-				$this->view->description = $this->translator->translate ( 'If you delete the bank information parameters the registrar will be no more available.' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete the selected record?' );
+				$this->view->description = $this->translator->translate ( 'If you delete the registrar information, the record will no longer be available.' );
 				
 				$record = $this->registrars->find ( $id, null, true );
 				$this->view->recordselected = $record [0] ['name'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -152,9 +152,9 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/registrars/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/registrars/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/registrars/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/registrars/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		$this->view->description = "Here you can edit the registrar data.";
@@ -180,7 +180,7 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 				$form->populate ( $rs[0] );
 			}
 			
-			$this->view->buttons[] = array("url" => "/admin/registrars/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+			$this->view->buttons[] = array("url" => "/admin/registrars/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 				
 		}
 		
@@ -205,9 +205,9 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/banks/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/banks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/banks/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/banks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -231,7 +231,7 @@ class Admin_RegistrarsController extends Shineisp_Controller_Admin {
 		} else {
 			
 			$this->view->form = $form;
-			$this->view->title = $this->translator->translate("Registrar review");
+			$this->view->title = $this->translator->translate("Registrar");
 			$this->view->description = $this->translator->translate("Here you can fix the registrar parameters.");
 			return $this->render ( 'applicantform' );
 		}

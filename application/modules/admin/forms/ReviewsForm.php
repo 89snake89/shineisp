@@ -6,13 +6,14 @@ class Admin_Form_ReviewsForm extends Zend_Form
     {
         // Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
     	$this->addElement('select', 'product_id', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Product',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Product'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->getElement('product_id')
@@ -23,101 +24,94 @@ class Admin_Form_ReviewsForm extends Zend_Form
         $this->addElement('text', 'publishedat', array(
             'filters'     => array('StringTrim'),
             'required'    => false,
-            'decorators'  => array('Composite'),
-            'label'       => 'Published At',
-            'class'       => 'text-input little-input date'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Published At'),
+            'class'       => 'form-control date'
         ));
                   
         $this->addElement('text', 'nick', array(
             'filters'     => array('StringTrim'),
             'required'    => false,
-            'decorators'  => array('Composite'),
-            'label'       => 'Nick',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Nick'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('select', 'referer', array(
         		'filters'     => array('StringTrim'),
-        		'decorators'  => array('Composite'),
-        		'label'       => 'Who is Talking About Us?',
-        		'class'       => 'text-input medium-input',
-        		'multiOptions' => array('Google' => 'Google', 'Bing' => 'Bing', 'Yahoo' => 'Yahoo', 'Other Search Engine' => 'Other Search Engine', 'Websites' => 'Websites/Blogs', 'Magento Commerce' => 'Magento Commerce', 'Friend suggestion' => 'Friend suggestion')
+        		'decorators'  => array('Bootstrap'),
+        		'label'       => $translate->_('Who is Talking About Us?'),
+        		'class'       => 'form-control',
+        		'multiOptions' => array('Google' => 'Google', 'Bing' => 'Bing', 'Yahoo' => 'Yahoo', $translate->_('Other Search Engine') => $translate->_('Other Search Engine'), 'Websites' => $translate->_('Websites/Blogs'), $translate->_('Friend suggestion') => $translate->_('Friend suggestion'))
         ));
         
         $this->addElement('text', 'city', array(
         		'filters'     => array('StringTrim'),
-        		'decorators'  => array('Composite'),
-        		'label'       => 'City',
-        		'class'       => 'text-input medium-input'
+        		'decorators'  => array('Bootstrap'),
+        		'label'       => $translate->_('City'),
+        		'class'       => 'form-control'
         ));        
                   
         $this->addElement('text', 'ip', array(
         		'filters'     => array('StringTrim'),
-        		'decorators'  => array('Composite'),
-        		'label'       => 'IP',
-        		'class'       => 'text-input medium-input'
+        		'decorators'  => array('Bootstrap'),
+        		'label'       => $translate->_('IP'),
+        		'class'       => 'form-control'
         ));        
                   
         $this->addElement('text', 'latitude', array(
         		'filters'     => array('StringTrim'),
-        		'decorators'  => array('Composite'),
-        		'label'       => 'Latitude',
-        		'class'       => 'text-input small-input'
+        		'decorators'  => array('Bootstrap'),
+        		'label'       => $translate->_('Latitude'),
+        		'class'       => 'form-control'
         ));       
                   
         $this->addElement('text', 'longitude', array(
         		'filters'     => array('StringTrim'),
-        		'decorators'  => array('Composite'),
-        		'label'       => 'Longitude',
-        		'class'       => 'text-input small-input'
+        		'decorators'  => array('Bootstrap'),
+        		'label'       => $translate->_('Longitude'),
+        		'class'       => 'form-control'
         ));       
                   
         $this->addElement('text', 'subject', array(
             'filters'     => array('StringTrim'),
             'required'    => false,
-            'decorators'  => array('Composite'),
-            'label'       => 'Subject',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Subject'),
+            'class'       => 'form-control'
         ));
                   
         $this->addElement('text', 'email', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Email',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Email'),
+            'class'       => 'form-control'
         ));
         
-    	$this->addElement('select', 'stars', array(
+    	$this->addElement('text', 'stars', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Stars',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input',
-    		'multiOptions' => array(1 => '1 Star', 2 => '2 Stars', 3 => '3 Stars', 4 => '4 Stars', 5 => '5 Stars')
+            'data-clearable'   => $translate->_('Delete'),
+            'data-min'   => "1",
+            'data-max'   => "5",
+            'label'      => $translate->_('Stars'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'rating',
         ));        
         
-    	$this->addElement('select', 'active', array(
+    	$this->addElement('checkbox', 'active', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Active',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input',
-    		'multiOptions' => array(0 => 'Not Published', 1 => 'Published')
+            'label'      => $translate->_('Active'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));        
         
         $this->addElement('textarea', 'review', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
+            'decorators'  => array('Bootstrap'),
         	'required'    => true,
-            'label'       => 'Review',
-            'class'       => 'textarea'
-        ));
-   
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+            'class'       => 'col-lg-12 form-control wysiwyg'
         ));
         
         $this->addElement('hidden', 'review_id');

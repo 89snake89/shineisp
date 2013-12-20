@@ -6,43 +6,43 @@ class Admin_Form_DomainsTasksForm extends Zend_Form
     {
         // Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
         $this->addElement('text', 'action', array(
             'filters'     => array('StringTrim'),
             'required'    => true,
-            'decorators'  => array('Composite'),
-            'label'       => 'Action',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Action'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('text', 'startdate', array(
             'filters'     => array('StringTrim'),
             'required'    => true,
-            'decorators'  => array('Composite'),
-            'label'       => 'Start',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Start'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('text', 'enddate', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'End',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('End'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('textarea', 'log', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Log',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Log'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('select', 'status_id', array(
-            'filters'     => array('StringTrim'),
             'required'    => true,
-            'decorators'  => array('Composite'),
-            'label'       => 'Status',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Status'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('status_id')
@@ -51,11 +51,10 @@ class Admin_Form_DomainsTasksForm extends Zend_Form
 					        ->setMultiOptions(Statuses::getList('domains_tasks'));
         
         $this->addElement('select', 'domain_id', array(
-            'filters'     => array('StringTrim'),
             'required'    => true,
-            'decorators'  => array('Composite'),
-            'label'       => 'Domain',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Domain'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('domain_id')
@@ -64,11 +63,10 @@ class Admin_Form_DomainsTasksForm extends Zend_Form
 					        ->setMultiOptions(Domains::getList());
         
         $this->addElement('select', 'registrars_id', array(
-            'filters'     => array('StringTrim'),
             'required'    => true,
-            'decorators'  => array('Composite'),
-            'label'       => 'Registrar',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Registrar'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('registrars_id')

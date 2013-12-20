@@ -6,57 +6,66 @@ class Admin_Form_CmspagesForm extends Zend_Form
     {
         // Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
         $this->addElement('text', 'title', array(
             'filters'     => array('StringTrim'),
             'required'    => false,
-            'decorators'  => array('Composite'),
-            'label'       => 'Title',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Title'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('textarea', 'body', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Body',
-            'class'       => 'textarea'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Body'),
+            'class'       => 'form-control col-lg-12'
         ));
         
         $this->addElement('text', 'var', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'URL-Key',
-        	'description' => 'This is the name of the page. For multilanguages website you can create more page with the same Url-key with different languages.',
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('URL-Key'),
+        	'description' => $translate->_('This is the name of the page. For multilanguages website you can create more page with the same Url-key with different languages.'),
             'rows'        => 5,
-            'class'       => 'text-input medium-input'
+            'class'       => 'form-control'
         ));
         
         $this->addElement('textarea', 'keywords', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Keywords',
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Keywords'),
             'rows'        => 5,
-            'class'       => 'textarea'
+            'description' => $translate->_('separate each keyword by a comma'),
+            'class'       => 'col-lg-12 form-control'
         ));
         
         $this->addElement('textarea', 'blocks', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Blocks',
-            'class'       => 'textarea'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Blocks'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('textarea', 'xmllayout', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'XML Layout',
-            'class'       => 'textarea'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('XML Layout'),
+            'class'       => 'form-control'
+        ));
+        
+        $this->addElement('checkbox', 'blog', array(
+            'filters'     => array('StringTrim'),
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('is Blog post'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('select', 'parent_id', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Parent',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Parent'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('parent_id')
@@ -65,9 +74,9 @@ class Admin_Form_CmspagesForm extends Zend_Form
                   ->setMultiOptions(CmsPages::getList(true));
         
         $this->addElement('select', 'layout', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Content layouts',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Content layouts'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('layout')
@@ -76,9 +85,9 @@ class Admin_Form_CmspagesForm extends Zend_Form
                   ->setMultiOptions(CmsPages::getLayouts());
         
         $this->addElement('select', 'pagelayout', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Page layouts',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Page layouts'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('pagelayout')
@@ -87,9 +96,14 @@ class Admin_Form_CmspagesForm extends Zend_Form
                   ->setMultiOptions(CmsPages::getPageLayouts());
         
         $this->addElement('multiselect', 'language_id', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Language',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Language'),
+            'title'	     => $translate->_('Select ...'),
+    		'data-container' => 'body',
+    		'data-selected-text-format' => 'count > 3',
+    		'data-size' => 'auto',
+    		'data-live-search' => 'true',
+            'class'      => 'multiselect show-tick col-md-4 col-sm-4'
         ));
                 
         $this->getElement('language_id')
@@ -97,32 +111,22 @@ class Admin_Form_CmspagesForm extends Zend_Form
                   ->setRegisterInArrayValidator(false)
                   ->setMultiOptions(Languages::getList());       
                                     
-        $this->addElement('select', 'showinmenu', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Show in the navigation menu',
-            'class'       => 'text-input large-input',
-        	'multioptions' => array( 0=>'Not Visible', 1=> 'Visible')
+        $this->addElement('checkbox', 'showinmenu', array(
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Show in the navigation menu'),
+            'class'       => 'form-control'
         ));
         
-        $this->addElement('select', 'showonrss', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Publish on RSS Feed',
-            'class'       => 'text-input large-input',
-        	'multioptions' => array( 0=>'Not Published', 1=> 'Published')
+        $this->addElement('checkbox', 'showonrss', array(
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Publish on RSS Feed'),
+            'class'       => 'form-control'
         ));
         
-        $this->addElement('select', 'active', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Active',
-            'class'       => 'text-input large-input',
-        	'multioptions' => array( 0=>'NO', 1=> 'YES')
-        ));
-        
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+        $this->addElement('checkbox', 'active', array(
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Active'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('hidden', 'page_id');

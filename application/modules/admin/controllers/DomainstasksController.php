@@ -44,9 +44,9 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 	 * @return datagrid
 	 */
 	public function listAction() {
-		$this->view->title = $this->translator->translate("Domains Tasks forms");
-		$this->view->description = $this->translator->translate("Here you can see all the domains tasks forms.");
-		$this->view->buttons = array(array("url" => "/admin/domainstasks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->title = $this->translator->translate("Tasks for hosted domains");
+		$this->view->description = $this->translator->translate("Here you can see all the tasks for hosted domains.");
+		$this->view->buttons = array(array("url" => "/admin/domainstasks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		
 		$this->datagrid->setConfig ( DomainsTasks::grid() )->datagrid ();
 	}
@@ -95,10 +95,10 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 	 */
 	public function newAction() {
 		$this->view->form = $this->getForm ( "/admin/domainstasks/process" );
-		$this->view->title = $this->translator->translate("New Domain task forms");
-		$this->view->description = $this->translator->translate("Here you can create a new domains tasks.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-								array("url" => "/admin/domainstasks/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->title = $this->translator->translate("New Domain task");
+		$this->view->description = $this->translator->translate("Here you can create a new domain task.");
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+								array("url" => "/admin/domainstasks/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		
 		$this->render ( 'applicantform' );
 	}
@@ -128,13 +128,13 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete the record selected?' );
-				$this->view->description = $this->translator->translate ( 'If you delete the domains tasks form information the data will be no longer restored' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete the selected record?' );
+				$this->view->description = $this->translator->translate ( 'If you delete the domain task information the data will no longer be restored' );
 				
 				$record = $this->domainstasks->getById ( $id, null, true );
 				$this->view->recordselected = $record [0] ['domain'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -152,9 +152,9 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/domainstasks/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/domainstasks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/domainstasks/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/domainstasks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -163,14 +163,14 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 				$rs[0]['startdate'] = Shineisp_Commons_Utilities::formatDateOut($rs[0]['startdate']);
 				$rs[0]['enddate'] = Shineisp_Commons_Utilities::formatDateOut($rs[0]['enddate']);
 				$form->populate ( $rs[0] );
-				$this->view->buttons[] = array("url" => "/admin/domainstasks/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/domainstasks/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 			}
 		}
 		
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
-		$this->view->title = $this->translator->translate("Domain task edit");
-		$this->view->description = $this->translator->translate("Here you can edit the domains tasks form information.");
+		$this->view->title = $this->translator->translate("Domain task");
+		$this->view->description = $this->translator->translate("Here you can edit the domain task information.");
 		
 		$this->view->form = $form;
 		$this->render ( 'applicantform' );
@@ -188,9 +188,9 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/domainstasks/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/domainstasks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/domainstasks/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/domainstasks/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request
@@ -211,8 +211,8 @@ class Admin_DomainstasksController extends Shineisp_Controller_Admin {
 			}
 		} else {
 			$this->view->form = $form;
-			$this->view->title = $this->translator->translate("Domain task edit");
-			$this->view->description = $this->translator->translate("Here you can edit the domains tasks form information.");
+			$this->view->title = $this->translator->translate("Domain task");
+			$this->view->description = $this->translator->translate("Here you can edit the domain task information.");
 			return $this->render ( 'applicantform' );
 		}
 	}

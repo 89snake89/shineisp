@@ -41,6 +41,7 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 		$datatype = $request->getParam ( 'type' );
 		$param = $request->getParam ( 'q' );
 		$autorenew = 1;
+		$links = "";
 		
 		switch ($datatype) {
 			case 'profitofyear' :
@@ -52,18 +53,27 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 						$links .= " <a href='/admin/reports/show/type/profitofyear/q/$year'>$year</a>";
 					}
 					
-					$this->view->title = $this->translator->_("Estimate revenues for %s", $param);
+					$this->view->title = $this->translator->_("Estimated Revenue for %s", $param);
 					
 					if(!empty($years)){
-						$this->view->description = $this->translator->_("Here below the economic summary of the %s.", $param) . " " . $links;
+						$this->view->description = $this->translator->_("Below is the economic summary of the %s.", $param) . " " . $links;
 					}else{
-						$this->view->description = $this->translator->_("Here below the economic summary of the %s.", $param);
+						$this->view->description = $this->translator->_("Below is the economic summary of the %s.", $param);
 					}
 					$this->view->year = $param;
 					
-					// Get the graph data
-					$this->view->monthsummary = Invoices::graph(array($param));
-					$this->view->weeksummary = Invoices::graph_week($param.'-01-01', $param . "-12-31");
+					$graph = new Shineisp_Commons_Morris();
+					
+					// Get the total of the revenues per year
+					$graphdata = $graph->setType('Area')
+										->setData(Orders::prepareGraphData(array($param), 'month', false))
+										->setElement('graph')
+										->setXkey('xdata')
+										->setLabels(array($this->translator->translate('Net Revenue (Taxable Income less Costs)')))
+										->setOptions(array('lineColors' => array('#428BCA'), 'preUnits' => Settings::findbyParam('currency') . " "))
+										->plot();
+					
+					$this->view->placeholder ( "admin_endbody" )->append ($graphdata);
 					
 					Invoices::getSummaryGrid($this->_helper, $param);
 					PurchaseInvoices::getSummaryGrid($this->_helper, $param);
@@ -73,24 +83,63 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 				}
 				break;
 			
+			case 'productsummary' :
+				$years = Invoices::getYears();
+					
+				foreach ($years as $year) {
+					$links .= " <a href='/admin/reports/show/type/productsummary/q/$year'>$year</a>";
+				}
+				
+				if(!empty($years)){
+					$this->view->description = $this->translator->_("In this list you can see the summary of the products sold. %s", $param) . " <br/> " . $links . " <a href='/admin/reports/show/type/productsummary/'>".$this->translator->translate('Show All')."</a> ";
+				}else{
+					$this->view->description = $this->translator->_("In this list you can see the summary of the products sold. %s", $param);
+				}
+				
+				$this->view->title = $this->translator->translate("Products summary");
+				$this->view->data = array ('records' => Orders::getProductSoldSummary ($param));
+				break;
+			
 			case 'tldsummarypermonth' :
-				$this->view->title = $this->translator->translate("Month TLD Summary");
+				$this->view->title = $this->translator->translate("Domain TLD monthly summary");
 				$this->view->description = $this->translator->translate("In this list you can see the summary of the TLD per month.");
-				$this->view->graph = array(Domains::tldSummaryPerMonth ());
+				
+				$graph = new Shineisp_Commons_Morris();
+				$data = Domains::prepareGraphDataperMonth();
+				if(!empty($data)){
+					// Get the total of the revenues per year
+					$graphdata = $graph->setType('Bar')
+												->setData($data)
+												->setElement('graph')
+												->setXkey('xdata')
+												->setLabels(array_keys($data['tld']))
+												->plot();
+						
+					$this->view->placeholder ( "admin_endbody" )->append ($graphdata);
+				}
 				$this->view->data = array ('records' => Domains::getSummaryPerMonth ());
 				break;
 			
 			case 'domainstats' :
-				$this->view->title = $this->translator->translate("Domains Stats");
+				$this->view->title = $this->translator->translate("Domain stats");
 				$this->view->description = $this->translator->translate("This list shows all the costs and earnings of the domains sold grouped by tld.");
-				$this->view->graph = array(Domains::earningsSummary ());
+
+				$graph = new Shineisp_Commons_Morris();
+				
+				// Get the tlds domains per type
+				$graphdata = $graph->setType('Donut')
+										->setData(Domains::prepareGraphData ())
+										->setElement('graph')
+										->plot(true);
+					
+				$this->view->placeholder ( "admin_endbody" )->append ($graphdata);
+				
 				$this->view->data = array ('records' => Domains::getSummary ());
 				break;
 			
 			case 'tldsummaryowner' :
-				$this->view->title = $this->translator->translate("Summary by Client");
+				$this->view->title = $this->translator->translate("Summary per client");
 				$this->view->description = $this->translator->translate("By this list you can see the summary of the domains bought per client.");
-				$this->view->graph = "";
 				$this->view->data = array ('records' => Domains::domains_per_customers (), 'pager' => true);
 				break;
 			
@@ -122,29 +171,29 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 							oi.cost as cost, 
 							oi.price as price";
 				
-				$this->view->title = $this->translator->translate("List of the Recurring Services");
+				$this->view->title = $this->translator->translate("List of the recurring services");
 				$this->view->description = $this->translator->translate("By this list you can see the summary of the services bought per client.");
 				$this->view->graph = "";
 				$this->view->data = array ('records' => OrdersItems::getAllRecurringServices ( $fields, $groups ), 'pager' => true);
 				break;
 			
-			case 'ticketsummay' :
-				$this->view->title = $this->translator->translate("Tickets Summary");
+			case 'ticketsummary' :
+				$this->view->title = $this->translator->translate("Ticket summary");
 				$this->view->description = $this->translator->translate("List of the last help requests.");
 				$this->view->graph = "";
 				$this->view->data = array ('records' => Tickets::Last(), 'actions' => array ('/admin/tickets/edit/id/' => 'show' ), 'pager' => true );
 				break;
 			
 			case 'domainsexpiration' :
-				$this->view->title = $this->translator->translate("Domain Expiration List");
-				$this->view->description = $this->translator->translate("This view helps you to check which are all the domain next to the expiration.");
+				$this->view->title = $this->translator->translate("Expiration list of domains");
+				$this->view->description = $this->translator->translate("This view helps you to check which are the domains next to expiration.");
 				$this->view->graph = "";
 				$this->view->data = array ('records' => Domains::getExpiringDomains(), 'actions' => array ('/admin/domains/edit/id/' => 'show' ), 'pager' => true );
 				break;
 			
 			case 'servicesexpiration' :
-				$this->view->title = $this->translator->translate("Service Expiration List");
-				$this->view->description = $this->translator->translate("This view helps you to check which are all the services next to the expiration.");
+				$this->view->title = $this->translator->translate("Expiration list of services");
+				$this->view->description = $this->translator->translate("This view helps you to check which are the services next to expiration.");
 				$this->view->graph = "";
 				$this->view->data = array ('records' => Products::getExpiringProducts(), 'actions' => array ('/admin/services/edit/id/' => 'show' ), 'pager' => true );
 				break;
@@ -167,6 +216,6 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 			DomainsTasks::DeleteTask($id);
 			$this->_helper->redirector ( 'show', 'reports', 'admin', array ('type' => 'domainstasks', 'mex' => 'Domain task has been deleted.', 'status' => 'success' ) );
 			
-		$this->_helper->redirector ( 'show', 'reports', 'admin', array ('type' => 'domainstasks', 'mex' => 'Domain task has not been deleted.', 'status' => 'error' ) );
+		$this->_helper->redirector ( 'show', 'reports', 'admin', array ('type' => 'domainstasks', 'mex' => 'Domain task has not been deleted.', 'status' => 'danger' ) );
 	}
 }

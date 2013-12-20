@@ -46,7 +46,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Orders list");
 		$this->view->description = $this->translator->translate("Here you can see all the orders.");
-		$this->view->buttons = array(array("url" => "/admin/orders/new/", "label" => $this->translator->translate('New order'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/orders/new/", "label" => $this->translator->translate('New order'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( Orders::grid () )->datagrid ();
 	}
 
@@ -97,7 +97,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( "/admin/orders/process" );
 		$this->view->title = $this->translator->translate("New Order");
 		$this->view->description = $this->translator->translate("Create a new order using this form.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save order'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save order'), "params" => array('css' => null,'id' => 'submit')));
 		$this->render ( 'applicantform' );
 	}
 	
@@ -108,18 +108,18 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 */
 	public function confirmAction() {
 		$id = $this->getRequest ()->getParam ( 'id' );
-		$controller = Zend_Controller_Front::getInstance ()->getRequest ()->getControllerName ();
+		$controller = $this->getRequest ()->getControllerName ();
 		try {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete this order?' );
-				$this->view->description = $this->translator->translate ( 'If you delete this order all the data will be no more longer available.' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete this order?' );
+				$this->view->description = $this->translator->translate ( 'If you delete this order all the data will no longer be available.' );
 				
 				$record = $this->orders->find ( $id );
 				$this->view->recordselected = $record ['order_id'] . " - " . Shineisp_Commons_Utilities::formatDateOut ( $record ['order_date'] );
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -174,20 +174,35 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	}
 	
 	/**
-	 * getproducts
 	 * Get products using the categories
+	 * 
 	 * @return Json
 	 */
 	public function getproductsAction() {
 		$id = $this->getRequest ()->getParam ( 'id' );
-		if($id == "domains"){
-			$products = DomainsTlds::getList();
-		}elseif(is_numeric($id)){
+		$products = array();
+		if(is_numeric($id)){
 			$products = ProductsCategories::getProductListbyCatID ( $id, "p.product_id, pd.name as name" );	
 		}
 		
 		die ( json_encode ( $products ) );
 	}
+	
+	/**
+	 * Get the billing cycle items
+	 * 
+	 * @return Json
+	 */
+	public function getbillingcyclesAction() {
+	    $billingcycles = array();
+	    $currency = Shineisp_Registry::get ( 'Zend_Currency' );
+	    $id = $this->getRequest ()->getParam ( 'id' );
+	    if(is_numeric($id)){
+	       $billingcycles = ProductsTranches::getTranches($id, "billing_cycle_id, bc.name as name, pt.price as price, pt.setupfee as setupfee");
+	    }
+	    die ( json_encode ( $billingcycles) );
+	}
+	
 	
 	/**
 	 * Get product info
@@ -218,11 +233,10 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * @return unknown_type
 	 */
 	public function editAction() {
-		
 		$form = $this->getForm ( '/admin/orders/process' );
 		$currency = Shineisp_Registry::getInstance ()->Zend_Currency;
-		
-		$form->getElement ( 'categories' )->addMultiOptions(array('domains' => $this->translator->translate('Domains')));
+		$customer = null;
+		$createInvoiceConfirmText = $this->translator->translate('Are you sure you want to create or overwrite the invoice for this order?');
 		$id = intval($this->getRequest ()->getParam ( 'id' ));
 		
 		$this->view->description = $this->translator->translate("Here you can edit the selected order.");
@@ -247,6 +261,9 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 					}
 				}
 
+				$rs ['profit'] = $rs ['total'] - $rs ['cost'];
+				$rs ['profit'] = $currency->toCurrency($rs['profit'], array('currency' => Settings::findbyParam('currency')));
+				
 				// set the default income to prepare the payment task
 				$rs ['income'] = $rs ['missing_income'];
 				$rs ['missing_income'] = sprintf('%.2f',$rs ['missing_income']);
@@ -275,47 +292,50 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 					$this->view->titlelink = "/index/link/id/" . $rs['fastlink'];
 				}
 				
-				$this->view->title = $this->translator->_( "Order nr. %s", $rs['order_number']);
-				$this->view->messages = Messages::find ( 'order_id', $id, true );
+				if(!empty($rs['order_number'])){
+					$this->view->title = $this->translator->_( "Order nr. %s", $rs['order_number']);
+				}
+				
+				$this->view->messages = Messages::getbyOrderId ($id);
+
+				$createInvoiceConfirmText = ( $rs ['missing_income'] > 0 ) ? $this->translator->translate('Are you sure you want to create or overwrite the invoice for this order? The order status is: not paid.') : $createInvoiceConfirmText;
+				$customer = Customers::get_by_customerid ( $rs ['customer_id'], 'company, firstname, lastname, email' );
+				
 			} else {
 				$this->_helper->redirector ( 'list', 'orders', 'admin' );
 			}
 		}
 		
-		$customer = Customers::get_by_customerid ( $rs ['customer_id'], 'company, firstname, lastname, email' );
+		
 		$this->view->mex = urldecode ( $this->getRequest ()->getParam ( 'mex' ) );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
 		
-		$createInvoiceConfirmText = ( $rs ['missing_income'] > 0 ) ? $this->translator->translate('Are you sure to create or overwrite invoice for this order? The order is not paid.') : $this->translator->translate('Are you sure to create or overwrite invoice for this order?');
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-									array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('id'=>'submit', 'css' => array('button', 'float_right', 'submit'))),
-									array("url" => "/admin/orders/print/id/$id", "label" => $this->translator->translate('Print'), "params" => array('css' => array('button', 'float_right'))),
-									array("url" => "/admin/orders/dropboxit/id/$id", "label" => $this->translator->translate('Dropbox It'), "params" => array('css' => array('button', 'float_right'))),
-									array("url" => "/admin/orders/clone/id/$id", "label" => $this->translator->translate('Clone'), "params" => array('css' => array('button', 'float_right'))),
-									array("url" => "/admin/orders/sendorder/id/$id", "label" => $this->translator->translate('Email'), "params" => array('css' => array('button', 'float_right'))),
-									array("url" => "/admin/orders/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right'))),
-									array("url" => "/admin/orders/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
-									array("url" => "/admin/customers/edit/id/".$rs ['customer_id'], "label" => $this->translator->translate('Customer'), "params" => array('css' => array('button', 'float_right'))),
+									array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('id'=>'submit', 'css' => array('btn btn-success'))),
+									array("url" => "/admin/orders/print/id/$id", "label" => $this->translator->translate('Print'), "params" => array('css' => null)),
+									array("url" => "/admin/orders/dropboxit/id/$id", "label" => $this->translator->translate('Dropbox It'), "params" => array('css' => null)),
+									array("url" => "/admin/orders/clone/id/$id", "label" => $this->translator->translate('Clone'), "params" => array('css' => null)),
+									array("url" => "/admin/orders/sendorder/id/$id", "label" => $this->translator->translate('Email'), "params" => array('css' => array('btn btn-danger'))),
+									array("url" => "/admin/orders/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('btn btn-danger'))),
+									array("url" => "/admin/orders/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 								);
 		
 		// Check if the order has been invoiced
 		$invoice_id = Orders::isInvoiced($id);
 		if($invoice_id){
-			$this->view->buttons[] = array("url" => "/admin/orders/sendinvoice/id/$invoice_id", "label" => $this->translator->translate('Email invoice'), "params" => array('css' => array('button', 'float_right')));
-			$this->view->buttons[] = array("url" => "/admin/invoices/print/id/$invoice_id", "label" => $this->translator->translate('Print invoice'), "params" => array('css' => array('button', 'float_right')));
+			$this->view->buttons[] = array("url" => "/admin/orders/sendinvoice/id/$invoice_id", "label" => $this->translator->translate('Email invoice'), "params" => array('css' => array('btn btn-danger')));
+			$this->view->buttons[] = array("url" => "/admin/invoices/print/id/$invoice_id", "label" => $this->translator->translate('Print invoice'), "params" => array('css' => null));
 		} else {
 			// Order not invoiced, show button to create a new invoice
-			$this->view->buttons[] = array("url" => "/admin/orders/createinvoice/id/$id", "label" => $this->translator->translate('Invoice'), "params" => array('css' => array('button', 'float_right')), 'onclick' => "return confirm('".$createInvoiceConfirmText."')");
+			$this->view->buttons[] = array("url" => "/admin/orders/createinvoice/id/$id", "label" => $this->translator->translate('Invoice'), "params" => array('css' => array('btn btn-danger')), 'onclick' => "return confirm('".$createInvoiceConfirmText."')");
 		}
-		
-		// Get Order status history
-		$status = StatusHistory::getStatusList($id);
 		
 		$this->view->customer          = array ('records' => $customer, 'editpage' => 'customers' );
 		$this->view->ordersdatagrid    = $this->orderdetailGrid ();
 		$this->view->paymentsdatagrid  = $this->paymentsGrid ();
+		$this->view->statushistory     = StatusHistory::getStatusList($id);  // Get Order status history
 		$this->view->filesgrid         = $this->filesGrid ();
 		$this->view->statushistorygrid = $this->statusHistoryGrid ();
 		$this->view->form              = $form;
@@ -323,36 +343,35 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	}
 	
 	private function orderdetailGrid() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
+		
 		if (isset ( $request->id ) && is_numeric ( $request->id )) {
-			$rs = Orders::getDetails ( $request->id );
+			$rs = Orders::getDetails ( $request->id, "detail_id,
+			                                          DATE_FORMAT(d.date_start, '".Settings::getMySQLDateFormat('dateformat')."') as date-start,
+			                                          DATE_FORMAT(d.date_end, '".Settings::getMySQLDateFormat('dateformat')."') as date-end,
+			                                          d.quantity, 
+								                      d.description, 
+			                                          d.setupfee, 
+			                                          CONCAT(d.discount, ' %') as discount, 
+								                      d.price, 
+		                                              d.vat,
+								                      d.subtotal,
+			                                          CONCAT(dm.domain, '.',ws.tld) as domain" );
 			if (isset ( $rs )) {
+				$columns = array();
+				$columns[] = $this->translator->translate('Quantity');
+				$columns[] = $this->translator->translate('Description');
+				$columns[] = $this->translator->translate('Setup fees');
+				$columns[] = $this->translator->translate('Price');
+				$columns[] = $this->translator->translate('VAT');
+				$columns[] = $this->translator->translate('Subtotal');
+				$columns[] = $this->translator->translate('Start data');
+				$columns[] = $this->translator->translate('End data');
+				$columns[] = $this->translator->translate('Discount');
+				$columns[] = $this->translator->translate('Domain');
 				
-				// In this section I will delete the empty OrdersItemsDomains subarray created by Doctrine because the simplegrid works only with a flat array
-				// where the array keys are the fields. So, if the OrdersItemsDomains is empty means that if the order item doesn't has 
-				// a domain attached it this empty array will be deleted in all the recordset.
-				// TODO: improve this section when doctrine improve the engine. 
-				$myrec = array ();
-				foreach ( $rs as $record ) {
-					$amount = $record ['quantity'] * $record ['price'] + $record ['setupfee'];
-					
-					// Add the taxes if the product need them
-					if ($record ['taxpercentage'] > 0) {
-						$record ['vat'] = number_format ( ($amount * $record ['taxpercentage'] / 100), 2 );
-						$record ['grandtotal'] = number_format ( ($amount * (100 + $record ['taxpercentage']) / 100), 2 );
-					} else {
-						$record ['vat'] = 0;
-						$record ['grandtotal'] = $amount;
-					}
-					
-					if (count ( $record ['OrdersItemsDomains'] ) == 0) {
-						unset ( $record ['OrdersItemsDomains'] );
-					}
-					unset ( $record ['taxpercentage'] );
-					$myrec [] = $record;
-				}
-				
-				return array (	'records' => $myrec, 
+				return array (	'columns' => $columns, 
+				                'records' => $rs, 
 								'delete' => array ('controller' => 'ordersitems', 'action' => 'confirm' ), 
 								'edit' => array ('controller' => 'ordersitems', 'action' => 'edit' ), 
 								'actions' => array('/admin/services/edit/id/' => $this->translator->translate('Service')), 
@@ -409,13 +428,13 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * Clone the order 
 	 */
 	public function cloneAction() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		if (isset ( $request->id ) && is_numeric ( $request->id )) {
 			$newOrderId = Orders::cloneOrder ( $request->id );
 			if (is_numeric ( $newOrderId )) {
 				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $newOrderId, 'mex' => 'The task requested has been executed successfully.', 'status' => 'success' ) );
 			} else {
-				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'Order has been not cloned' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'Order has been not cloned' ), 'status' => 'danger' ) );
 			}
 		}
 		$this->_helper->redirector ( 'list', 'orders', 'admin' );
@@ -425,7 +444,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * Delete payment transaction
 	 */
 	public function deletepaymentAction() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		if (isset ( $request->id ) && is_numeric ( $request->id )) {
 
 			// Get the order id attached to the payment transaction
@@ -436,22 +455,39 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 				if (Payments::deleteByID($request->id)) {
 					$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderId, 'mex' => 'The task requested has been executed successfully.', 'status' => 'success' ) );
 				} else {
-					$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderId, 'mex' => $this->translator->translate ( 'There was a problem' ), 'status' => 'error' ) );
+					$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderId, 'mex' => $this->translator->translate ( 'There was a problem' ), 'status' => 'danger' ) );
 				}
 			}
 		}
 		$this->_helper->redirector ( 'list', 'orders', 'admin' );
 	}
 	
+	/**
+	 * Delete the attached file from the order
+	 */
+	public function deletefileAction(){
+	    $id = $this->getRequest ()->getParam('id');
+	    if(is_numeric($id)){
+	        $record = Files::get_by_id($id);
+	        if($record){
+	            $orderId = $record['id'];
+	            Files::del($id);
+	            $this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderId, 'mex' => 'The task requested has been executed successfully.', 'status' => 'success' ) );
+	        }
+	    }
+	    
+	    $this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'There was a problem' ), 'status' => 'danger' ) );
+	}
+	
 	/*
-	 * 
+	 * Get the list of the attached files
 	 */
 	private function filesGrid() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		if (isset ( $request->id ) && is_numeric ( $request->id )) {
-			$rs = Files::findbyExternalId ( $request->id, "orders", "file, Date_Format(date, '%d/%m/%Y') as date" );
+			$rs = Files::findbyExternalId ( $request->id, "orders", "file, Date_Format(date, '%d/%m/%Y') as date, fc.name as name, DATE_FORMAT(lastdownload, '".Settings::getMySQLDateFormat('dateformat')."') as downloaded" );
 			if (isset ( $rs [0] )) {
-				return array ('records' => $rs, 'delete' => array ('controller' => 'files', 'action' => 'confirm' ) );
+				return array ('records' => $rs, 'actions' => array ('/admin/orders/getfile/id/' => $this->translator->translate('Download') ), 'delete' => array ('controller' => 'orders', 'action' => 'deletefile' ) );
 			}
 		}
 	}
@@ -460,7 +496,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * 
 	 */
 	private function statusHistoryGrid() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		if (isset ( $request->id ) && is_numeric ( $request->id )) {
 			$rs = StatusHistory::getAll($request->id, "orders");
 			$columns[] = $this->translator->translate('Date');
@@ -471,6 +507,19 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 		}
 	}
 	
+	/**
+	 * get the file attached into the order
+	 */
+	public function getfileAction(){
+	    $id = $this->getRequest ()->getParam('id');
+	    $file = Files::get_by_id($id);
+	    if(!empty($file)){
+	        if(!Files::downloadbykey($file['publickey'])){
+	            $this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'There was a problem' ), 'status' => 'danger' ) );
+	        }
+	    }
+	    $this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'There was a problem' ), 'status' => 'danger' ) );
+	}
 	
 	/**
 	 * createinvoiceAction
@@ -478,7 +527,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * @return void
 	 */
 	public function createinvoiceAction() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		if (is_numeric ($request->id) && !Orders::isInvoiced($request->id)) {
 			//TODO: create invoice should only create the invoice and not set order as complete
 			//Orders::Complete($request->id);
@@ -499,9 +548,9 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/orders/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/orders/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/orders/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/orders/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Get the id 
@@ -520,7 +569,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 			$id = Orders::saveAll ( $params, $id );
 			
 			// Save the upload file
-			Orders::UploadDocument($id, $params ['customer_id']);
+			Orders::UploadDocument($id, $params);
 			
 			$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 		} else {
@@ -601,7 +650,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderid, 'mex' => $this->translator->translate ( 'The order has been sent successfully.' ), 'status' => 'success' ) );
 			}
 		}
-		$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderid, 'mex' => $this->translator->translate ( 'The order has not been found.' ), 'status' => 'error' ) );
+		$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $orderid, 'mex' => $this->translator->translate ( 'The order has not been found.' ), 'status' => 'danger' ) );
 	}
 	
 	/**
@@ -616,12 +665,12 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 		if ($order) {
 			if (is_numeric ( $invoiceid )) {
 				if (Invoices::sendInvoice ( $invoiceid )) {
-					$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $invoiceid, 'mex' => $this->translator->translate ( 'The invoice has been sent successfully.' ), 'status' => 'success' ) );
+					$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $invoiceid, 'mex' => $this->translator->translate ( 'Invoice sent successfully.' ), 'status' => 'success' ) );
 				}
 			}
-			$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $invoiceid, 'mex' => $this->translator->translate ( 'The invoice has not been found.' ), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'edit', 'invoices', 'admin', array ('id' => $invoiceid, 'mex' => $this->translator->translate ( 'The invoice has not been found.' ), 'status' => 'danger' ) );
 		}
-		$this->_helper->redirector ( 'list', 'invoices', 'admin', array ('mex' => $this->translator->translate ( 'The invoice has not been found.' ), 'status' => 'error' ) );
+		$this->_helper->redirector ( 'list', 'invoices', 'admin', array ('mex' => $this->translator->translate ( 'The invoice has not been found.' ), 'status' => 'danger' ) );
 	}
 	
 	
@@ -631,7 +680,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * @return void
 	 */
 	public function printAction() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		try {
 			if (is_numeric ( $request->id )) {
 				$file = Orders::pdf ( $request->id, false, true );
@@ -639,7 +688,7 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 				die;
 			}
 			
-			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'The order has not been found.' ), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'orders', 'admin', array ('mex' => $this->translator->translate ( 'The order has not been found.' ), 'status' => 'danger' ) );
 			
 		} catch ( Exception $e ) {
 			die ( $e->getMessage () );
@@ -652,13 +701,13 @@ class Admin_OrdersController extends Shineisp_Controller_Admin {
 	 * @return void
 	 */
 	public function dropboxitAction() {
-		$request = Zend_Controller_Front::getInstance ()->getRequest ();
+		$request = $this->getRequest ();
 		if (is_numeric ( $request->id )) {
 			$sent = Orders::pdf( $request->id, false, true );
 			if ($sent) {
-				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'The order has been uploaded in dropbox.' ), 'status' => 'success' ) );
+				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'The order has been uploaded to dropbox.' ), 'status' => 'success' ) );
 			} else {
-				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'There was a problem during the process.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'edit', 'orders', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'There was a problem during the process.' ), 'status' => 'danger' ) );
 			}
 		}
 	}

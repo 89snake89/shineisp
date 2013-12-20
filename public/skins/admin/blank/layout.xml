@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+
+	<!-- Default configuration of the whole project -->
+	<general template="1column">
+		<head>
+		    <!-- JS files to be include in every pages-->
+            <js override="1" position="admin_endbody">//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js</js>  
+            <js override="1" position="admin_endbody">//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js</js>
+			<css override="1">//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css</css>
+			
+			<js override="1" position="admin_endbody">/resources/jquery/jquery.cookie.js</js>
+			
+			<!--Bootstrap CSS framework conditional stylesheet for all the brower to be include in every frontend pages-->
+            <css override="1">//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css</css>
+            <css override="1">//netdna.bootstrapcdn.com/font-awesome/4.0.2/css/font-awesome.min.css</css>
+            <js override="1" position="admin_endbody">//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js</js>
+		</head>
+	</general>
+	
+    <!-- Admin Template Section -->
+	<admin>
+		<!-- Common files called at the start of the admin module and will be APPENDED to the page with the GENERAL head items -->
+		<commons template="1column">
+			<head>
+				
+				<!-- TINYMCE -->
+				<js override="1" position="admin_endbody">/resources/wysiwyg/tinymce/tinymce.min.js</js>
+				
+                <js override="1" position="admin_endbody">/resources/jquery/bootstrap-typeahead.min.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/bootstrap-hogan-2.0.0.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/bootstrap-growl.min.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/jquery.tokeninput.js</js>
+                
+                <js override="1" position="admin_endbody">/resources/jquery/jquery.ui.datepicker-it.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/jquery.dynatree.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/jquery.dataTables.min.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/jquery.dataTables.delay.js</js>
+                
+                <js override="1" position="admin_endbody">/resources/jquery/bootstrap-select.min.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/bootstrap-rating-input.min.js</js>
+                <js override="1" position="admin_endbody">/resources/jquery/bootstrap-switch.min.js</js>
+                
+                <js position="admin_endbody">/js/smartresize.js</js> 
+                <js position="admin_endbody">/js/grid.js</js> 
+                
+                <css>/css/grid.css</css>  
+                
+                <!-- files to be include in every ADMIN pages-->
+                
+                <css override="1">/resources/jquery/css/ui.dynatree.css</css>
+                <css override="1">/resources/jquery/css/jquery.dataTables.css</css>
+                <css override="1">/resources/jquery/css/bootstrap-select.min.css</css>
+                <css override="1">/resources/jquery/css/bootstrap-switch.css</css>
+                <css override="1">/resources/jquery/css/bootstrap-typeahead.css</css>
+			</head>
+		</commons>
+		 
+		<index>
+			<head>
+				<!-- MORRIS Chart tool -->
+				<js override="1" position="admin_endbody">//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js</js>
+				<js override="1" position="admin_endbody">http://cdn.oesmith.co.uk/morris-0.4.3.min.js</js>
+				<css override="1">http://cdn.oesmith.co.uk/morris-0.4.3.min.css</css>
+				
+				<js position="admin_endbody">/js/login.js</js> 
+				<js position="admin_endbody">/js/widget.js</js> 
+				<css>/css/widget.css</css> 
+			</head>
+			<!--
+			<blocks>
+			     <block side="endcontent">contacts</block>
+			</blocks>
+			-->
+		</index>
+		
+		<reports>
+			<head>
+				<!-- MORRIS Chart tool -->
+				<js override="1" position="admin_endbody">//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js</js>
+				<js override="1" position="admin_endbody">http://cdn.oesmith.co.uk/morris-0.4.3.min.js</js>
+				<css override="1">http://cdn.oesmith.co.uk/morris-0.4.3.min.css</css>
+			</head>
+		</reports>
+		
+		<orders>
+			<head>
+				<js position="admin_endbody" override="1">https://raw.github.com/appendto/jquery-mockjax/master/jquery.mockjax.js</js> 
+				<js position="admin_endbody" override="1">//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js</js> 
+				<js position="admin_endbody" override="1">http://vitalets.github.io/x-editable/assets/select2/select2.js</js> 
+				<css override="1">//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css</css> 
+				<css override="1">http://vitalets.github.io/x-editable/assets/select2/select2.css</css> 
+			</head>
+			<!--
+			<blocks>
+			     <block side="endcontent">contacts</block>
+			</blocks>
+			-->
+		</orders>
+		
+		
+		
+	</admin>
+
+</layout>

@@ -5,9 +5,9 @@
  * 
  * This class manage the Bank module
  * 
- * @package    ##PACKAGE##
- * @subpackage ##SUBPACKAGE##
- * @author     ##NAME## <##EMAIL##>
+ * @package    ShineISP
+ * 
+ * @author     Shine Software <info@shineisp.com>
  * @version    SVN: $Id: Builder.php 7490 2010-03-29 19:53:27Z jwage $
  */
 class Banks extends BaseBanks
@@ -21,14 +21,14 @@ class Banks extends BaseBanks
 		
 		$translator = Shineisp_Registry::getInstance ()->Zend_Translate;
 		
-		$config ['datagrid'] ['columns'] [] = array ('label' => null, 'field' => 'b.bank_id', 'alias' => 'bank_id', 'type' => 'selectall' );
+		$config ['datagrid'] ['columns'] [] = array ('label' => null, 'field' => 'b.bank_id', 'alias' => 'bank_id', 'type' => 'selectall', 'attributes' => array('width' => 50 ) );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Id' ), 'field' => 'b.bank_id', 'alias' => 'bank_id', 'sortable' => true, 'searchable' => true, 'type' => 'string' );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Name' ), 'field' => 'name', 'alias' => 'name', 'sortable' => true, 'searchable' => true, 'type' => 'string' );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Test Mode' ), 'field' => 'test_mode', 'alias' => 'testmode', 'sortable' => true, 'searchable' => true, 'type' => 'string' );
 		
 		$config ['datagrid'] ['fields'] = "bank_id, name, account, enabled, test_mode as testmode";
 		$config ['datagrid'] ['rownum'] = $rowNum;
-		
+		$config ['datagrid'] ['rowlist'] = array ('10', '50', '100', '1000' );
 		$config ['datagrid'] ['dqrecordset'] = Doctrine_Query::create ()->select ( $config ['datagrid'] ['fields'] )->from ( 'Banks b' );
 		
 		$config ['datagrid'] ['basepath'] = "/admin/banks/";

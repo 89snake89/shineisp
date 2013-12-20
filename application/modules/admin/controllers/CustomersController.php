@@ -46,7 +46,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Customer list");
 		$this->view->description = $this->translator->translate("Here you can see all the customers.");
-		$this->view->buttons = array(array("url" => "/admin/customers/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/customers/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( Customers::grid() )->datagrid ();
 	}
 	
@@ -88,6 +88,35 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 	}
 	
 	/**
+	 * Search the record for the Select2 JQuery Object by ajax
+	 * @return json
+	 */
+	public function searchAction() {
+	    
+	    if($this->getRequest()->isXmlHttpRequest()){
+	    
+    	    $term = $this->getParam('term');
+    	    $id = $this->getParam('id');
+    	    
+    	    if(!empty($term)){
+    	        $term = "%$term%";
+    	        $records = Customers::findbyCustomfield("(firstname LIKE ?) OR (lastname LIKE ?) OR company LIKE ?", array($term,$term,$term));
+    	        die(json_encode($records));
+    	    }
+    	    
+    	    if(!empty($id)){
+    	        $records = Customers::get_by_customerid($id);
+    	        die(json_encode($records));
+    	    }
+    	    
+    	    $records = Customers::getAll();
+    		die(json_encode($records));
+	    }else{
+	        die();
+	    }
+	}
+	
+	/**
 	 * newAction
 	 * Create the form module in order to create a record
 	 * @return unknown_type
@@ -96,8 +125,8 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( "/admin/customers/process" );
 		$this->view->title = $this->translator->translate("Customer details");
 		$this->view->description = $this->translator->translate("Here you can edit the customer details.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-							   		 array("url" => "/admin/customers/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+							   		 array("url" => "/admin/customers/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		$this->render ( 'applicantform' );
 	}
 	
@@ -113,13 +142,13 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'WARNING: Are you sure to delete this customer, domains, invoices, orders, tickets?' );
-				$this->view->description = $this->translator->translate ( 'If you delete this customer whole information will be no longer available anymore.' );
+				$this->view->title = $this->translator->translate ( 'WARNING: Are you sure you want to delete this customer, their domains, invoices, orders and tickets?' );
+				$this->view->description = $this->translator->translate ( 'If you delete this customer whole information will no longer be available anymore.' );
 				
 				$record = $this->customers->find ( $id );
 				$this->view->recordselected = $record ['firstname'] . " " . $record ['lastname'] . " " . $record ['company'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -143,7 +172,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 					}
 					
 				} catch ( Exception $e ) {
-					$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $customer['customer_id'], 'mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+					$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $customer['customer_id'], 'mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 				}
 			}
 		}
@@ -165,7 +194,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 						$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $customer['customer_id'], 'mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 					}
 				} catch ( Exception $e ) {
-					$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $customer['customer_id'], 'mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+					$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $customer['customer_id'], 'mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 				}
 			}
 		}
@@ -182,7 +211,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 					$this->_helper->redirector ( 'list', 'customers', 'admin', array ('mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
 				}
 			} catch ( Exception $e ) {
-				$this->_helper->redirector ( 'list', 'customers', 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', 'customers', 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 			}
 		}
 	}
@@ -200,7 +229,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 				Customers::del($id);
 			}
 		} catch ( Exception $e ) {
-			$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $id, 'mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 		}
 		
 		$this->_helper->redirector ( 'list', 'customers', 'admin', array ('mex' => $this->translator->translate ( 'The task requested has been executed successfully.' ), 'status' => 'success' ) );
@@ -214,7 +243,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 	public function editAction() {
 		
 		$form = $this->getForm ( '/admin/customers/process' );
-		$form->getElement ( 'save' )->setLabel ( 'Update' );
+		
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		$this->view->title = $this->translator->translate("Customer edit");
@@ -222,9 +251,9 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/customers/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))),
-				array("url" => "/admin/customers/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/customers/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)),
+				array("url" => "/admin/customers/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
@@ -245,9 +274,9 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 					$this->view->title = $rs['firstname'] . " " . $rs['lastname'];
 				}
 				
-				$this->view->buttons[] = array("url" => "/admin/orders/new", "label" => $this->translator->translate('New Order'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/admin/customers/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
-				$this->view->buttons[] = array("url" => "/default/index/fastlogin/id/" . Shineisp_Commons_Hasher::hash_string($rs['email']), "label" => $this->translator->translate('Public profile'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/orders/new", "label" => $this->translator->translate('New Order'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/admin/customers/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
+				$this->view->buttons[] = array("url" => "/default/index/fastlogin/id/" . Shineisp_Commons_Hasher::hash_string($rs['email']), "label" => $this->translator->translate('Public profile'), "params" => array('css' => null));
 				
 			}
 		}
@@ -278,8 +307,8 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 			if (isset ( $rs [0] )) {
 				
 				$columns[] = $this->translator->translate('Domain');
-				$columns[] = $this->translator->translate('Created at');
-				$columns[] = $this->translator->translate('Expiring date');
+				$columns[] = $this->translator->translate('Creation Date');
+				$columns[] = $this->translator->translate('Expiry Date');
 				
 				return array ('name' => 'domains', 'columns'=>$columns, 'records' => $rs, 'edit' => array ('controller' => 'domains', 'action' => 'edit' ), 'pager' => true );
 			}
@@ -319,18 +348,18 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 					}
 						
 					$columns[] = $this->translator->translate('Product');
-					$columns[] = $this->translator->translate('Created at');
-					$columns[] = $this->translator->translate('Expiration date');
+					$columns[] = $this->translator->translate('Creation Date');
+					$columns[] = $this->translator->translate('Expiry Date');
 					$columns[] = $this->translator->translate('Days left');
 					$columns[] = $this->translator->translate('Price');
 					$columns[] = $this->translator->translate('Automatic renewal');
 					$columns[] = $this->translator->translate('Status');
 					
-					return array ('name' => 'services','columns'=>$columns, 'records' => $rs, 'edit' => array ('controller' => 'ordersitems', 'action' => 'edit' ), 'pager' => true );
+					return array ('name' => 'services', 'columns'=>$columns, 'records' => $rs, 'edit' => array ('controller' => 'ordersitems', 'action' => 'edit' ), 'pager' => true );
 				}
 			}
 		} catch ( Exception $e ) {
-			$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'Unable to process request at this time.' ) . ": " . $e->getMessage (), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $request->id, 'mex' => $this->translator->translate ( 'Unable to process the request at this time.' ) . ": " . $e->getMessage (), 'status' => 'danger' ) );
 		}
 	}	
 	
@@ -377,7 +406,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 	private function ordersGrid() {
 		$request = Zend_Controller_Front::getInstance ()->getRequest ();
 		if (isset ( $request->id ) && is_numeric ( $request->id )) {
-			$rs = Orders::getOrdersByCustomerID ( $request->id, "o.order_id, o.order_id as order, o.order_number as order_number, i.formatted_number as invoice, DATE_FORMAT(o.order_date, '%d/%m/%Y') as date, o.grandtotal as total");
+			$rs = Orders::getOrdersByCustomerID ( $request->id, "o.order_id, o.order_id as order, o.order_number as order_number, in.formatted_number as invoice, DATE_FORMAT(o.order_date, '%d/%m/%Y') as date, o.grandtotal as total");
 			if (isset ( $rs )) {
 				
 				$columns[] = $this->translator->translate('ID');
@@ -397,7 +426,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 			$rs = Tickets::getByCustomerID ( $request->id, "t.subject, s.status, DATE_FORMAT(t.date_open, '%d/%m/%Y') as date_open, c.company");
 			
 			$columns[] = $this->translator->translate('Subject');
-			$columns[] = $this->translator->translate('Created at');
+			$columns[] = $this->translator->translate('Creation Date');
 			$columns[] = $this->translator->translate('Company');
 			$columns[] = $this->translator->translate('Status');
 			
@@ -479,9 +508,9 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/customers/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/customers/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/customers/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)),
+				array("url" => "/admin/customers/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		try {
@@ -511,7 +540,7 @@ class Admin_CustomersController extends Shineisp_Controller_Admin {
 				return $this->render ( 'applicantform' );
 			}
 		} catch ( Exception $e ) {
-			$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $id, 'mex' => $e->getMessage (), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'edit', 'customers', 'admin', array ('id' => $id, 'mex' => $e->getMessage (), 'status' => 'danger' ) );
 		}
 	}
 	

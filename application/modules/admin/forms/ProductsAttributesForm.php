@@ -5,19 +5,20 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
     	$this->addElement('text', 'code', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Attribute Code',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Attribute Code'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
     			
         $this->addElement('select', 'is_visible_on_front', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Visible on Product page',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Visible on Product page'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('is_visible_on_front')
@@ -26,9 +27,9 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
                   ->setMultiOptions(array('0'=>'No', '1' =>'Yes'));
                   
         $this->addElement('select', 'is_required', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Is Required',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Is Required'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('is_required')
@@ -37,9 +38,9 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
                   ->setMultiOptions(array('0'=>'No', '1' =>'Yes'));
                   
         $this->addElement('select', 'is_comparable', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Is Comparable',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Is Comparable'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('is_comparable')
@@ -48,9 +49,9 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
                   ->setMultiOptions(array('0'=>'No', '1' =>'Yes'));
                   
         $this->addElement('select', 'on_product_listing', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Use on Product Listing',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Use on Product Listing'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('on_product_listing')
@@ -60,9 +61,9 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
                   
                   
         $this->addElement('select', 'active', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'Active',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Active'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('active')
@@ -72,9 +73,9 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
                   
                   
         $this->addElement('select', 'system', array(
-            'decorators'  => array('Composite'),
-            'label'       => 'System',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('System'),
+            'class'       => 'form-control'
         ));
         
         $this->getElement('system')
@@ -85,16 +86,16 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
     	
     	$this->addElement('text', 'position', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Position',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Position'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
                   
     	
     	$this->addElement('select', 'system_var', array(
-            'label'      => 'System Variable',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('System Variable'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->getElement('system_var')
@@ -104,52 +105,52 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
     	
     	$this->addElement('text', 'defaultvalue', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Default Value',
-            'description'      => 'When the type of the object is a selectbox you have to use the Json code. eg: {"1": "True", "0": "False"}',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Default Value'),
+            'description'      => $translate->_('When the type of the object is a selectbox you have to use the Json code. eg: {"1": "True", "0": "False"}'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
     	
         $this->addElement('hidden', 'language_id', array(
-            'decorators'  => array('Composite')
+            'decorators'  => array('Bootstrap')
         ));
     	
     	$this->addElement('text', 'label', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Label',
+            'label'      => $translate->_('Label'),
     		'required'   => true,
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));      
     	
     	$this->addElement('text', 'description', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Description',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Description'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));      
     	
     	$this->addElement('text', 'prefix', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Prefix',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Prefix'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));      
     	
     	$this->addElement('text', 'suffix', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Suffix',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Suffix'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));      
     	
     	$this->addElement('select', 'type', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Type',
-    		'description' => 'If the type is a dropdown selector you have to set the options using the Json structure in the default value textbox.',
+            'label'      => $translate->_('Type'),
+    		'description' => $translate->_('If the type is a dropdown selector you have to set the options using the Json structure in the default value textbox.'),
     		'required'   => true,
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));      
  		
         $this->getElement('type')
@@ -157,11 +158,6 @@ class Admin_Form_ProductsAttributesForm extends Zend_Form
                   ->setRegisterInArrayValidator(false)
                   ->setMultiOptions(array('text'=>'Textbox', 'select' =>'Dropdown Select', 'checkbox' =>'Checkbox'));
                           
-        $this->addElement('submit', 'save', array(
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
-        ));
                 
         $this->addElement('hidden', 'attribute_id');
     }

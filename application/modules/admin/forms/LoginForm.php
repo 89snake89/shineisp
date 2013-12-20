@@ -5,17 +5,18 @@ class Admin_Form_LoginForm extends Zend_Form
     {
     	// Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
         $this->addElement('text', 'email', array(
             'filters'    => array('StringTrim', 'StringToLower'),
             'validators' => array(
                 'EmailAddress',
             ),
-            'decorators' => array('Composite'),
+            'decorators' => array('Bootstrap'),
             'required'   => true,
             'description'      => 'Write your own email',
-            'label'      => 'Email',
-            'class'      => 'text-input large-input'
+            'placeholder'      => $translate->_('Email'),
+            'class'      => 'form-control input-sm'
         ));
         
         $this->addElement('password', 'password', array(
@@ -23,22 +24,22 @@ class Admin_Form_LoginForm extends Zend_Form
             'validators' => array(
                 array('regex', false, '/^[a-zA-Z0-9\-\_\.\%\!\$]{6,20}$/')
             ),
-            'decorators' => array('Composite'),
+            'decorators' => array('Bootstrap'),
             'description'      => 'Write your own password',
             'required'   => true,
-            'label'      => 'Password',
-            'class'      => 'text-input large-input'
+            'placeholder'      => $translate->_('Password'),
+            'class'      => 'form-control input-sm'
         ));
 
         $this->addElement('checkbox', 'rememberme', array(
-            'label'    => 'Remember Me',
-            'decorators' => array('Composite')
+            'label'    => $translate->_('Remember Me'),
+            'decorators' => array('Bootstrap')
         ));
 
         $this->addElement('submit', 'login', array(
-            'label'    => 'Login',
-            'decorators' => array('Composite'),
-        	'class'      => 'button'
+            'label'    => $translate->_('Login'),
+            'decorators' => array('Bootstrap'),
+        	'class'      => 'btn btn-primary'
         ));
         
     }

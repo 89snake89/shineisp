@@ -5,21 +5,15 @@ class Admin_Form_PurchasescategoriesForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
         $this->addElement('text', 'category', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Category',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
-        ));                
-        
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
-        ));
+            'label'      => $translate->_('Category'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
+        ));   
         
         $this->addElement('hidden', 'category_id');
     }

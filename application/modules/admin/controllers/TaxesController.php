@@ -46,7 +46,7 @@ class Admin_TaxesController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Tax");
 		$this->view->description = $this->translator->translate("Here you can see all the taxes.");
-		$this->view->buttons = array(array("url" => "/admin/taxes/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/taxes/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		
 		$this->datagrid->setConfig ( Taxes::grid() )->datagrid ();
 	}
@@ -96,9 +96,9 @@ class Admin_TaxesController extends Shineisp_Controller_Admin {
 	public function newAction() {
 		$this->view->form = $this->getForm ( "/admin/taxes/process" );
 		$this->view->title = $this->translator->translate("New Tax");
-		$this->view->description = $this->translator->translate("Here you can create a new taxes.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-								array("url" => "/admin/taxes/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->description = $this->translator->translate("Here you can create a new tax.");
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+								array("url" => "/admin/taxes/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		
 		$this->render ( 'applicantform' );
 	}
@@ -128,13 +128,13 @@ class Admin_TaxesController extends Shineisp_Controller_Admin {
 			if (is_numeric ( $id )) {
 				$this->view->back = "/admin/$controller/edit/id/$id";
 				$this->view->goto = "/admin/$controller/delete/id/$id";
-				$this->view->title = $this->translator->translate ( 'Are you sure to delete this tax class?' );
-				$this->view->description = $this->translator->translate ( 'If you delete this order all the data will be no more longer available.' );
+				$this->view->title = $this->translator->translate ( 'Are you sure you want to delete this tax class?' );
+				$this->view->description = $this->translator->translate ( 'If you delete this order all the data will no longer be available.' );
 				
 				$record = $this->taxes->find ( $id, null, true );
 				$this->view->recordselected = $record [0] ['name'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -149,21 +149,21 @@ class Admin_TaxesController extends Shineisp_Controller_Admin {
 	public function editAction() {
 		$form = $this->getForm ( '/admin/taxes/process' );
 		//* GUEST - ALE - 20130322: Rimosso setLabel in quanto il campo non e' presente nella form
-		//$form->getElement ( 'save' )->setLabel ( 'Update' );
+		//
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/taxes/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/taxes/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/taxes/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/taxes/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
 			$rs = Taxes::find ( $id, null, true );
 			if (! empty ( $rs[0] )) {
 				$form->populate ( $rs[0] );
-				$this->view->buttons[] = array("url" => "/admin/taxes/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right')));
+				$this->view->buttons[] = array("url" => "/admin/taxes/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null));
 			}
 		}
 		
@@ -188,9 +188,9 @@ class Admin_TaxesController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/taxes/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/taxes/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/taxes/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/taxes/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		// Check if we have a POST request

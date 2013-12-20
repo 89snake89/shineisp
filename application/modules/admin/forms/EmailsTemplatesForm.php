@@ -5,19 +5,20 @@ class Admin_Form_EmailsTemplatesForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
     	$this->addElement('text', 'name', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'E-Mail Name',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('E-Mail Name'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 		
     	$this->addElement('select', 'type', array(
-            'label'      => 'Section',
-            'decorators' => array('Composite'),
-    		'class'      => 'text-input large-input'
+            'label'      => $translate->_('Section'),
+            'decorators' => array('Bootstrap'),
+    		'class'      => 'form-control'
         ));
         $this->getElement('type')
                   ->setAllowEmpty(false)
@@ -36,72 +37,66 @@ class Admin_Form_EmailsTemplatesForm extends Zend_Form
     	$this->addElement('text', 'fromname', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'From name',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('From name'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
     	$this->addElement('text', 'fromemail', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'From E-Mail',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('From E-Mail'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
     	$this->addElement('text', 'cc', array(
             'filters'    => array('StringTrim'),
             'required'   => false,
-            'label'      => 'Always CC',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Always CC'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
     	$this->addElement('text', 'bcc', array(
             'filters'    => array('StringTrim'),
             'required'   => false,
-            'label'      => 'Always BCC',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Always BCC'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
     	$this->addElement('checkbox', 'plaintext', array(
-            'label'      => 'Always send in plaintext',
-            'decorators' => array('Composite')
+            'label'      => $translate->_('Always send in plaintext'),
+            'decorators' => array('Bootstrap')
         ));
 
     	$this->addElement('checkbox', 'active', array(
-            'label'      => 'Active',
-            'decorators' => array('Composite')
+            'label'      => $translate->_('Active'),
+            'decorators' => array('Bootstrap')
         ));
 		
-		
-		/*
-		 * TEXTS
-		 */
 		$this->addElement('text', 'subject', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'E-Mail Subject',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('E-Mail Subject'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));		 
 		$this->addElement('textarea', 'html', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'HTML Content',
+            'label'      => $translate->_('HTML Content'),
             'class'      => 'wysiwyg_fullpage'
         ));		 
 		$this->addElement('textarea', 'text', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'TEXT Content',
+            'label'      => $translate->_('TEXT Content'),
         ));
 		
-		
-        
         $this->addElement('submit', 'save', array(
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+            'label'    => $translate->_('Save'),
+            'decorators' => array('Bootstrap'),
+            'class'    => 'btn'
         ));
                 
         $this->addElement('hidden', 'template_id');

@@ -1,0 +1,37 @@
+<?php
+
+function genMenu($container)
+{
+	$translator = Shineisp_Registry::getInstance ()->Zend_Translate;
+    foreach ($container as $page)
+    {
+        echo '<li class="dropdown">' . "\n";
+
+        $href = $page->uri;
+        $target = !empty($page->pages) ? null : "_self";
+        $class = !empty($page->pages) ? 'dropdown-toggle' : "";
+        $toggle = !empty($page->pages) ? "dropdown" : "";
+        $icon = !empty($page->icon) ? "<i class=\"" . $page->icon . "\"></i> " : "";
+        
+        echo '<a href="' . $href . '" class="'.$class.'" data-toggle="'.$toggle.'" target="' . $target . '">' . $icon . $translator->translate($page->label) . '</a>' . "\n";
+        
+        if (!empty($page->pages))
+        {
+            echo '<ul class="dropdown-menu">' . "\n";
+
+            genMenu($page->pages);
+
+            echo '</ul>' . "\n";
+        }
+
+        echo '</li>' . "\n";
+    }
+}
+
+
+// echo '<div class="navbar-collapse collapse"><ul class="nav navbar-nav">' . "\n";
+
+genMenu($this->container);
+
+// echo '</ul></div>';
+

@@ -52,61 +52,31 @@ class ServicesController extends Shineisp_Controller_Default {
 			$arrSort [] = $sort;
 		}
 		
-		$params['search'] = array ('method' => 'andWhere', 'criteria' => "(c.customer_id = ? OR c.parent_id = ?)", 'value' => array($NS->customer ['customer_id'], $NS->customer ['customer_id']));
-		
 		$page = ! empty ( $page ) && is_numeric ( $page ) ? $page : 1;
-		$data = $this->services->findAll ( "d.order_id, oid.relationship_id, d.description as Description, s.status as Status, DATE_FORMAT(d.date_start, '%d/%m/%Y') as Creation_Date, DATE_FORMAT(d.date_end, '%d/%m/%Y') as Expiring_Date, d.product_id", $page, $NS->recordsperpage, $arrSort, $params );
+		$params['search'][] = array ('method' => 'andWhere', 'criteria' => "(c.customer_id = ? OR c.parent_id = ?)", 'value' => array($NS->customer ['customer_id'], $NS->customer ['customer_id']));
+// 		$params['search'][] = array ('method' => 'whereIn', 'criteria' => "o.status_id", 'value' => array(Statuses::id('paid', 'orders'), Statuses::id('complete', 'orders')));
+		$data = $this->services->findAll ( "d.order_id, oid.relationship_id, d.description, CONCAT(dm.domain, '.', ws.tld) as domain, s.status as Status, DATE_FORMAT(d.date_start, '".settings::getMySQLDateFormat()."') as Creation_Date, DATEDIFF(d.date_end, CURRENT_DATE) as daysleft, DATE_FORMAT(d.date_end, '".settings::getMySQLDateFormat()."') as Expiring_Date, d.product_id", $page, $NS->recordsperpage, $arrSort, $params );
 		
 		$data ['currentpage'] = $page;
 		
+		for ($i=0; $i<count($data['records']); $i++){
+		   $data['records'][$i]['description'] = Shineisp_Commons_Utilities::truncate($data['records'][$i]['description'], 40);
+		   $data['records'][$i]['daysleft'] = ($data['records'][$i]['daysleft'] < 30) ? "<span class='label label-danger'>".$data['records'][$i]['daysleft']."</span>" : "<span class='label label-success'>".$data['records'][$i]['daysleft']."</span>";
+		}
+		
+		
 		$data ['columns'][] = $this->translator->translate('Description');
+		$data ['columns'][] = $this->translator->translate('Domain');
 		$data ['columns'][] = $this->translator->translate('Status');
-		$data ['columns'][] = $this->translator->translate('Created at');
-		$data ['columns'][] = $this->translator->translate('Expiring date');
+		$data ['columns'][] = $this->translator->translate('Creation Date');
+		$data ['columns'][] = $this->translator->translate('Days left');
+		$data ['columns'][] = $this->translator->translate('Expiry Date');
 		
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
 		$this->view->title = $this->translator->translate("Services List");
 		$this->view->description = $this->translator->translate("List of all your own services subscribed");
 		$this->view->service = $data;
-	}
-
-	public function changeAction(){
-		$NS = new Zend_Session_Namespace ( 'Default' );
-		$id = $this->getRequest ()->getParam ( 'id' );
-		$id	= intval($id);
-		if ( $id == 0 ) {
-			return $this->_helper->redirector ( 'services/list' );
-		}
-
-		$refundInfo		= $this->services->getRefundInfo($id);
-		$productid		= $refundInfo['productid'];
-		$priceRefund	= $refundInfo['refund'];
-
-		if( ! property_exists($NS, 'upgrade') ) {
-			$NS->upgrade = array();	
-		}
-		
-		$NS->upgrade[$id]	= array();
-		$productsUpgrades	= ProductsUpgrades::getUpgradesbyProductID($productid);
-		$products	= array();
-		foreach($productsUpgrades as $productUpgradeId => $productUpgradeName ) {
-			$productUpgrade					= Products::getAllInfo($productUpgradeId);	
-			$productUpgrade['name']			= $productUpgrade['ProductsData'][0]['name'];
-			$productUpgrade['shortdescription']= $productUpgrade['ProductsData'][0]['shortdescription'];
-			$productUpgrade['reviews'] 		= Reviews::countItems($productUpgradeId);
-			$productUpgrade['attributes'] 	= ProductsAttributes::getAttributebyProductID($productUpgradeId, $NS->langid, true);
-			
-			$products[]		= $productUpgrade;
-			
-			$NS->upgrade[$id][]	= $productUpgradeId;
-		}
-
-		$this->view->priceRefund 	= $priceRefund;
-		$this->view->products 		= $products;
-		
-		$this->view->title = $this->translator->translate("Upgrade products List");
-		$this->view->description = $this->translator->translate("Upgrade the selected service with one of the following services.");
 	}
 	
 	/**
@@ -154,13 +124,15 @@ class ServicesController extends Shineisp_Controller_Default {
 			$this->view->setup = OrdersItems::getSetupConfig($id);
 			
 			// Get all the messages attached to the ordersitems
-			$this->view->messages = Messages::find ( 'detail_id', $id, true );
+			$this->view->messages = Messages::getbyServiceId ($id);
 			
-			$this->view->days = $rs ['daysleft'];
+			$this->view->title = $rs ['product'];
+		}else{
+		    $this->view->title = $this->translator->translate("Detail of the service");
 		}
 		
-		$this->view->title = $this->translator->translate("Service Details");
-		$this->view->description = $this->translator->translate("List of all the service details.");
+		
+		$this->view->description = $this->translator->translate("Here you can see the detail of the service.");
 		$this->view->dnsdatagrid = $this->dnsGrid ();
 		$this->view->form = $form;
 		$this->_helper->viewRenderer ( 'customform' );
@@ -184,7 +156,7 @@ class ServicesController extends Shineisp_Controller_Default {
 		if (! $form->isValid ( $request->getPost () )) {
 			// Invalid entries
 			$this->view->form = $form;
-			$this->view->title = $this->translator->translate("Service processing");
+			$this->view->title = $this->translator->translate("Service");
 			$this->view->description = $this->translator->translate("Check all the fields and click on the save button");
 			return $this->_helper->viewRenderer ( 'customform' ); // re-render the login form
 		}
@@ -281,7 +253,7 @@ class ServicesController extends Shineisp_Controller_Default {
 			$cvs = Shineisp_Commons_Utilities::cvsExport ( $service );
 			die ( json_encode ( array ('mex' => '<a href="/public/documents/export.csv">' . $registry->Zend_Translate->translate ( "download" ) . '</a>' ) ) );
 		}
-		die ( json_encode ( array ('mex' => $this->translator->translate ( "exporterror" ) ) ) );
+		die ( json_encode ( array ('mex' => $this->translator->translate ( "There was a problem during the export process" ) ) ) );
 	}
 	
 	/*
@@ -302,10 +274,10 @@ class ServicesController extends Shineisp_Controller_Default {
 					die ( json_encode ( array ('mex' => $this->translator->translate ( "The task requested has been executed successfully." ) ) ) );
 				}
 			} else {
-				die ( json_encode ( array ('mex' => $this->translator->translate ( "methodnotset" ) ) ) );
+				die ( json_encode ( array ('mex' => $this->translator->translate ( "This feature has been not released yet" ) ) ) );
 			}
 		}
-		die ( json_encode ( array ('mex' => $this->translator->translate ( "An error has occured during the task requested." ) ) ) );
+		die ( json_encode ( array ('mex' => $this->translator->translate ( "An error occurred during the task execution." ) ) ) );
 	}
 	
 	/**

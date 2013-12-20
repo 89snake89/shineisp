@@ -41,6 +41,21 @@ class IndexController extends Shineisp_Controller_Default {
 	}
 
 	/**
+	 * Get a file attached into the documents
+	 */
+	public function getfilesAction() {
+	    $translator = Shineisp_Registry::getInstance ()->Zend_Translate;
+	    
+	    $key = $this->getRequest ()->getParam('key');
+	    Files::downloadbykey($key);
+	    
+	    if(!Files::downloadbykey($key)){
+	        $this->_helper->redirector ( 'index', array ('mex' => $translator->translate ( 'File not found' ), 'status' => 'danger' ) );
+	    }
+	
+	}
+
+	/**
 	 * QrCode Invoice Order Management
 	 */
 	public function qrcodeAction() {
@@ -79,7 +94,7 @@ class IndexController extends Shineisp_Controller_Default {
 			if (count ( $retval ) == 0) {
 				$result = new Zend_Auth_Result ( Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID, $secretKey );
 				$NS->customer = null;
-				$this->view->message = $translator->translate ( 'Email or Password incorrect' );
+				$this->view->message = $translator->translate ( 'Email Address or Password is incorrect.' );
 				return $this->_helper->viewRenderer ( 'generic' ); 
 			} else {
 				$NS->customer = $retval [0];
@@ -123,10 +138,10 @@ class IndexController extends Shineisp_Controller_Default {
 				), null, null, null, null, $customer[0]['language_id']);		
 				
 				$this->view->mextype = "success";
-				$this->view->mex = $translator->translate ( 'Password sent to your email box. You have to click in the link written in the email.' );
+				$this->view->mex = $translator->translate ( 'Your password has been sent. Please click on the link contained in the email.' );
 			} else {
 				$this->view->mextype = "alert";
-				$this->view->mex = $translator->translate ( 'User not found. Check your credentials.' );
+				$this->view->mex = $translator->translate ( 'User not found. Please check your credentials.' );
 			}
 		}
 		return $this->_helper->viewRenderer ( 'password' );
@@ -167,7 +182,7 @@ class IndexController extends Shineisp_Controller_Default {
 			$this->view->mex = $translator->translate ( 'Email sent' );
 		} else {
 			$this->view->mextype = "alert";
-			$this->view->mex = $translator->translate ( 'Error occurred during setting of the password.' );
+			$this->view->mex = $translator->translate ( 'An error occurred while setting your password. Please try again.' );
 		}
 		
 		return $this->_helper->viewRenderer ( 'password' );

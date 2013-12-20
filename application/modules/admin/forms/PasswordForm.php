@@ -5,17 +5,18 @@ class Admin_Form_PasswordForm extends Zend_Form
     {
     	// Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
         $this->addElement('text', 'email', array(
             'filters'    => array('StringTrim', 'StringToLower'),
             'validators' => array(
                 'EmailAddress',
             ),
-            'decorators' => array('Composite'),
+            'decorators' => array('Bootstrap'),
             'required'   => true,
-            'description'      => 'Write your own email',
-            'label'      => 'Email',
-            'class'      => 'text-input large-input'
+            'description'      => $translate->_('Write your own email'),
+            'label'      => $translate->_('Email'),
+            'class'      => 'form-control'
         ));
         
 
@@ -27,8 +28,8 @@ class Admin_Form_PasswordForm extends Zend_Form
         	$recaptcha = new Zend_Service_ReCaptcha($pubKey, $privKey);
         	$captcha = new Zend_Form_Element_Captcha('captcha',
         			array(
-        					'label' => 'Captcha Check',
-        					'description' => 'Type the characters you see in the picture below.',
+        					'label' => $translate->_('Captcha Check'),
+        					'description' => $translate->_('Type the characters you see in the picture below.'),
         					'captcha' =>  'ReCaptcha',
         					'captchaOptions'        => array(
         							'captcha'   => 'ReCaptcha',
@@ -41,9 +42,9 @@ class Admin_Form_PasswordForm extends Zend_Form
         }
 
         $this->addElement('submit', 'submit', array(
-            'label'    => 'Submit',
-            'decorators' => array('Composite'),
-        	'class'      => 'button'
+            'label'    => $translate->_('Reset my password'),
+            'decorators' => array('Bootstrap'),
+        	'class'      => 'btn btn-danger'
         ));
         
     }

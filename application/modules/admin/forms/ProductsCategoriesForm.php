@@ -5,58 +5,61 @@ class Admin_Form_ProductsCategoriesForm extends Zend_Form
     {
         // Set the custom decorator
     	$this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+    	$translate = Shineisp_Registry::get('Zend_Translate');
     	
         $this->addElement('text', 'name', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Name',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input little-input'
+            'label'      => $translate->_('Name'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
 
         $this->addElement('text', 'uri', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'URI',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('URI'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));        
 
         $this->addElement('text', 'googlecategs', array(
             'filters'    => array('StringTrim'),
             'required'   => true,
-            'label'      => 'Google Categories',
-            'description'      => 'See at http://support.google.com/merchants/bin/answer.py?hl=it&answer=1705911 for the list of the tassonomy',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Google Categories'),
+            'description'      => $translate->_('See at http://support.google.com/merchants/bin/answer.py?hl=it&answer=1705911 for the list of the tassonomy'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));        
 
         $this->addElement('text', 'position', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Position',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Position'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));        
         
         $this->addElement('textarea', 'description', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Description'
+            'decorators' => array('Bootstrap'),
+            'label'      => $translate->_('Description'),
+            'class'      => 'col-lg-12 form-control wysiwyg'
         ));
         
         $this->addElement('textarea', 'keywords', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Keywords',
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Keywords'),
             'rows'        => 5,
-            'class'       => 'textarea'
+            'class'       => 'col-lg-12'
         ));     
         
         $this->addElement('select', 'parent', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Parent Category',
-            'description' => 'Select here the parent category.',
-            'decorators' => array('Composite'),
-            'class'      => 'text-input large-input'
+            'label'      => $translate->_('Parent Category'),
+            'description' => $translate->_('Select here the parent category.'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'form-control'
         ));
         
         $this->getElement('parent')
@@ -64,11 +67,11 @@ class Admin_Form_ProductsCategoriesForm extends Zend_Form
                   ->setMultiOptions(ProductsCategories::getList(true));   
         
         $this->addElement('multiselect', 'products', array(
-            'label'       => 'Products',
-            'description' => 'Select here the products to add to this category. Use Ctrl button to select more categories.',
-            'decorators'  => array('Composite'),
+            'label'       => $translate->_('Products'),
+            'description' => $translate->_('Select here the products to add to this category. Use Ctrl button to select more categories.'),
+            'decorators'  => array('Bootstrap'),
             'size' 		  => 20,
-            'class'       => 'text-input large-input'
+            'class'       => 'form-control'
         ));
         
         $this->getElement('products')
@@ -78,22 +81,22 @@ class Admin_Form_ProductsCategoriesForm extends Zend_Form
                   
         $this->addElement('textarea', 'blocks', array(
             'filters'    => array('StringTrim'),
-            'label'      => 'Blocks',
-            'decorators' => array('Composite'),
-            'class'      => 'textarea'
+            'label'      => $translate->_('Blocks'),
+            'decorators' => array('Bootstrap'),
+            'class'      => 'col-lg-12'
         ));            
        
         
         $this->addElement('checkbox', 'enabled', array(
-            'label'      => 'Enabled',
-            'decorators' => array('Composite'),
+            'label'      => $translate->_('Enabled'),
+            'decorators' => array('Bootstrap'),
             'class'      => 'checkbox'
         ));        
         
         $this->addElement('multiselect', 'wikipages', array(
         'label' => 'Wiki Pages',
-        'decorators' => array('Composite'),
-        'class'      => 'text-input large-input multiselect'
+        'decorators' => array('Bootstrap'),
+        'class'      => 'form-control multiselect'
         ));
         
         $this->getElement('wikipages')
@@ -104,8 +107,8 @@ class Admin_Form_ProductsCategoriesForm extends Zend_Form
         $this->addElement('submit', 'save', array(
             'required' => false,
             'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+            'decorators' => array('Bootstrap'),
+            'class'    => 'btn'
         ));
         
         

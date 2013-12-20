@@ -58,7 +58,7 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 	public function listAction() {
 		$this->view->title = $this->translator->translate("Domains list");
 		$this->view->description = $this->translator->translate("Here you can see all the domains.");
-		$this->view->buttons = array(array("url" => "/admin/domains/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "/admin/domains/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)));
 		$this->datagrid->setConfig ( Domains::grid () )->datagrid ();
 	}
 	
@@ -108,11 +108,40 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 		$this->view->form = $this->getForm ( '/admin/domains/process' );
 		$this->view->title = $this->translator->translate("New Domain");
 		$this->view->description = $this->translator->translate("Here you can create a new domain.");
-		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-									 array("url" => "/admin/domains/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))));
+		$this->view->buttons = array(array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+									 array("url" => "/admin/domains/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)));
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
 		$this->render ( 'applicantform' );
+	}
+	
+	/**
+	 * Search the record for the Select2 JQuery Object by ajax
+	 * @return json
+	 */
+	public function searchAction() {
+	
+	    if($this->getRequest()->isXmlHttpRequest()){
+	
+	        $term = $this->getParam('term');
+	        $id = $this->getParam('id');
+	
+	        if(!empty($term)){
+	            $term = "%$term%";
+	            $records = Domains::findbyCustomFields("CONCAT(d.domain, '.', d.tld) LIKE ?", $term);
+	            die(json_encode($records));
+	        }
+	
+	        if(!empty($id)){
+	            $records = Domains::find($id);
+	            die(json_encode($records));
+	        }
+	
+	        $records = Domains::get_domains_active();
+	        die(json_encode($records));
+	    }else{
+	        die();
+	    }
 	}
 	
 	/**
@@ -131,8 +160,8 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 				switch ($exec) {
 					
 					default :
-						$this->view->title = $this->translator->translate ( 'Are you sure to delete the domain?' );
-						$this->view->description = $this->translator->translate ( 'If a domain has been deleted it is no more restorable.' );
+						$this->view->title = $this->translator->translate ( 'Are you sure you want to delete this domain?' );
+						$this->view->description = $this->translator->translate ( 'If a domain is deleted, you will not be able to restore it.' );
 						$this->view->back = "/admin/$controller/edit/id/$id";
 						$this->view->goto = "/admin/$controller/delete/id/$id";
 						break;
@@ -141,7 +170,7 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 				$record = $this->domains->find ( $id, "CONCAT(d.domain, '.', d.tld) as domain", true );
 				$this->view->recordselected = $record [0] ['domain'];
 			} else {
-				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process request at this time.' ), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'list', $controller, 'admin', array ('mex' => $this->translator->translate ( 'Unable to process the request at this time.' ), 'status' => 'danger' ) );
 			}
 		} catch ( Exception $e ) {
 			echo $e->getMessage ();
@@ -194,16 +223,19 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 	public function editAction() {
 		$form = $this->getForm ( '/admin/domains/process' );
 		
+		$this->view->title = $this->translator->translate("Domain Edit");
+		$this->view->description = $this->translator->translate("Here you can edit your own domain parameters.");
+		
 		$id = $this->getRequest ()->getParam ( 'id' );
 		
 		if (! empty ( $id ) && is_numeric ( $id )) {
 			
 			// Create the buttons in the edit form
 			$this->view->buttons = array(
-					array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-					array("url" => "/admin/domains/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => array('button', 'float_right'))),
-					array("url" => "/admin/domains/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'))),
-					array("url" => "/admin/domains/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+					array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+					array("url" => "/admin/domains/confirm/id/$id", "label" => $this->translator->translate('Delete'), "params" => array('css' => null)),
+					array("url" => "/admin/domains/list", "label" => $this->translator->translate('List'), "params" => array('css' => null)),
+					array("url" => "/admin/domains/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 			);
 			
 			try {
@@ -217,7 +249,9 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 					$form->populate ( $rs [0] );
 					
 					if(!empty($rs [0] ['DomainsTlds']['WhoisServers'])){
-						$this->view->name = $rs [0] ['domain'] . "." . $rs [0] ['DomainsTlds']['WhoisServers']['tld'];
+						$this->view->title = $rs [0] ['domain'] . "." . $rs [0] ['DomainsTlds']['WhoisServers']['tld'];
+						$this->view->titlelink = "http://" . $rs [0] ['domain'] . "." . $rs [0] ['DomainsTlds']['WhoisServers']['tld'];
+						$this->view->icon = "fa fa-globe";
 					}
 					
 					$this->view->owner_datagrid = domains::ownerGrid ( $id );
@@ -229,16 +263,13 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 			}
 			$this->view->id = $id;
 			// Get all the messages attached to the domain
-			$this->view->messages = Messages::find ( 'domain_id', $id, true );
+			$this->view->messages = Messages::getbyDomainId($id);
 		}
 		
 		$this->view->mex = $this->getRequest ()->getParam ( 'mex' );
 		$this->view->mexstatus = $this->getRequest ()->getParam ( 'status' );
 		
 		$this->view->dns_datagrid = Domains::dnsGrid ();
-		$this->view->title = $this->translator->translate("Domain Edit");
-		$this->view->description = $this->translator->translate("Here you can edit your own domain parameters.");
-		
 		$this->view->form = $form;
 		
 		$this->view->services_datagrid = array ('records' => domains::Services ($id), 'edit' => array ('controller' => 'services', 'action' => 'edit' ) ); 
@@ -278,9 +309,9 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 		
 		// Create the buttons in the edit form
 		$this->view->buttons = array(
-				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/domains/list", "label" => $this->translator->translate('List'), "params" => array('css' => array('button', 'float_right'), 'id' => 'submit')),
-				array("url" => "/admin/domains/new/", "label" => $this->translator->translate('New'), "params" => array('css' => array('button', 'float_right'))),
+				array("url" => "#", "label" => $this->translator->translate('Save'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/domains/list", "label" => $this->translator->translate('List'), "params" => array('css' => null,'id' => 'submit')),
+				array("url" => "/admin/domains/new/", "label" => $this->translator->translate('New'), "params" => array('css' => null)),
 		);
 		
 		try {
@@ -338,7 +369,7 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 			$this->_helper->redirector ( 'edit', 'domains', 'admin', array ('id' => $id, 'mex' => 'The task requested has been executed successfully.', 'status' => 'success' ) );
 		
 		} catch ( Exception $e ) {
-			$this->_helper->redirector ( 'list', 'domains', 'admin', array ('mex' => $e->getMessage (), 'status' => 'error' ) );
+			$this->_helper->redirector ( 'list', 'domains', 'admin', array ('mex' => $e->getMessage (), 'status' => 'danger' ) );
 		}
 	}
 	
@@ -371,11 +402,11 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 					if ($retval) {
 						$this->_helper->redirector ( 'edit', 'domains', 'admin', array ('id' => $domain_id, 'mex' => 'Domain task added to queue.', 'status' => 'success' ) );
 					} else {
-						$this->_helper->redirector ( 'edit', 'domains', 'admin', array ('id' => $domain_id, 'mex' => 'Domain task has been not added to the queue.', 'status' => 'error' ) );
+						$this->_helper->redirector ( 'edit', 'domains', 'admin', array ('id' => $domain_id, 'mex' => 'Domain task has been not added to the queue.', 'status' => 'danger' ) );
 					}
 				}
 			} catch ( Exception $e ) {
-				$this->_helper->redirector ( 'edit', 'domains', 'admin', array ('id' => $domain_id, 'mex' => $e->getMessage (), 'status' => 'error' ) );
+				$this->_helper->redirector ( 'edit', 'domains', 'admin', array ('id' => $domain_id, 'mex' => $e->getMessage (), 'status' => 'danger' ) );
 			}
 			$this->_helper->redirector ( 'index', 'domains' );
 		}
@@ -430,8 +461,8 @@ class Admin_DomainsController extends Shineisp_Controller_Admin {
 		die ( json_encode ( array ('result' => 0 ) ) );
 	}
 	
+	
 	/**
-	 * getdomainsbyAjaxAction
 	 * get all the domains using an Ajax call
 	 * @return json array
 	 */

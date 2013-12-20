@@ -6,54 +6,48 @@ class Admin_Form_NewsletterForm extends Zend_Form
     {
         // Set the custom decorator
         $this->addElementPrefixPath('Shineisp_Decorator', 'Shineisp/Decorator/', 'decorator');
+        $translate = Shineisp_Registry::get('Zend_Translate');
         
         $this->addElement('text', 'subject', array(
             'filters'     => array('StringTrim'),
             'required'    => true,
-            'decorators'  => array('Composite'),
-            'label'       => 'Subject',
-            'class'       => 'text-input large-input'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Subject'),
+            'class'       => 'form-control'
         ));
         
         $this->addElement('text', 'sendat', array(
             'filters'     => array('StringTrim'),
             'required'    => false,
-            'decorators'  => array('Composite'),
-            'label'       => 'Send At',
-            'class'       => 'text-input little-input date'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Send At'),
+            'class'       => 'form-control date'
         ));
         
         $this->addElement('text', 'sent', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
-            'label'       => 'Sent',
-            'class'       => 'text-input little-input date'
+            'decorators'  => array('Bootstrap'),
+            'label'       => $translate->_('Sent'),
+            'class'       => 'form-control date'
         ));
         
         $this->addElement('textarea', 'message', array(
             'filters'     => array('StringTrim'),
-            'decorators'  => array('Composite'),
+            'decorators'  => array('Bootstrap'),
         	'required'    => true,
-            'label'       => 'Message',
-            'class'       => 'textarea wysiwyg'
-        ));
-   
-        $this->addElement('submit', 'save', array(
-            'required' => false,
-            'label'    => 'Save',
-            'decorators' => array('Composite'),
-            'class'    => 'button'
+            'label'       => $translate->_('Message'),
+            'class'       => 'col-lg-12 form-control wysiwyg'
         ));
         
         $this->addElement('select', 'sendagain', array(
-	        'label' => 'Send it again',
-	        'decorators' => array('Composite'),
-	        'class'      => 'text-input large-input'
+	        'label' => $translate->_('Send it again'),
+	        'decorators' => array('Bootstrap'),
+	        'class'      => 'form-control'
         ));
         
         $this->getElement('sendagain')
                   ->setAllowEmpty(true)
-                  ->setMultiOptions(array('0'=>'No, only once', '1'=>'Yes, send again'));        
+                  ->setMultiOptions(array('0'=> $translate->_('No, only once'), '1'=> $translate->_('Yes, send again')));        
         
         $this->addElement('hidden', 'news_id');
 

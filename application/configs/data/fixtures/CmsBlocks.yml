@@ -3,17 +3,17 @@ CmsBlocks:
     publishedat: '2011-02-25 15:41:32'
     var: contacts
     title: Contacts
-    body: "<h5>Contattare la ShineISP</h5> \r\n<p>I nostri tecnici sono a vostra disposizione dal lunedi al venerdi dalle 09.00 alle 18:00.<br/>\r\n\r\nInviate la vostra richiesta via modulo dei contatti specificando tutti i dettagli possibili. Fai click sul seguente link per accedere al modulo dei contatti: <a href=\"/contacts\">Contattaci</a></p><br/>"
+    body: '<div class="alert alert-info text-center">Download this html section from https://gist.github.com/shinesoftware/7462672</div>'
   CmsBlocks_2:
     publishedat: '2011-02-25 18:25:42'
     var: footer
     title: Footer
-    body: "<div class=\"row\">\r\n<div class=\"large-3 columns\">\r\n	<h6>Lorem <span>Ipsum</span></h6>\r\n	<ul class=\"no-bullet\">\r\n		<li><a href=\"/\">Homepage</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">About Us</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Contact us</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Technical Support</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Work with us</a></li>\r\n	</ul>\r\n</div>\r\n<div class=\"large-3 columns\">\r\n	<h6>Lorem <span>Ipsum</span></h6>\r\n	<ul class=\"no-bullet\">\r\n		<li><a href=\"/cms/lorem-ipsum.html\">About Us</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Contact us</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Technical Support</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Work with us</a></li>\r\n	</ul>\r\n</div>\r\n<div class=\"large-3 columns\">\r\n	<h6>Lorem <span>Ipsum</span></h6>\r\n	<ul class=\"no-bullet\">\r\n		<li><a href=\"/contacts\">Contact Us</a></li>\r\n		<li><a href=\"/cms/lorem-ipsum.html\">Review</a></li>\r\n		<li><a href=\"/wiki\">Wiki</a></li>\r\n	</ul>\r\n</div>\r\n<div class=\"large-3 columns last\">\r\n	<h6>About <span>Lorem Ipsum</span></h6>\r\n	<p class=\"text\">\r\n		 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. <a href=\"/contacts\">Contact Us</a>\r\n	</p>\r\n\r\n</div>\r\n</div>"
+    body: '<div class="alert alert-info text-center">Download this html section from https://gist.github.com/shinesoftware/7464788</div>'
   CmsBlocks_3:
     publishedat: '2011-09-30 19:29:55'
-    var: twitter
-    title: Twitter
-    body: "<div class=\"twitter\">\r\n				<div class=\"center\">\r\n					<!-- Simply change the href to your username -->\r\n					<a href=\"http://twitter.com/shine_software\" class=\"profile\"></a><p></p>\r\n				</div>\r\n			</div>"
+    var: slideshow
+    title: Slideshow
+    body: '<div class="alert alert-info text-center">Download this html section from https://gist.github.com/shinesoftware/7462672</div>'
   CmsBlocks_4:
     publishedat: '2012-02-20 12:17:07'
     var: callouts
@@ -25,12 +25,7 @@ CmsBlocks:
     title: Facebook
     body: '<a href="#">Seguici su facebook</a>'
   CmsBlocks_6:
-    publishedat: '2012-02-24 18:51:00'
-    var: contacts
-    title: 'Contacts (english version)'
-    body: "<h3>Contact ShineISP staff</h3> \r\n<p>Our developers are available from monday to friday. [09.00 am - 06:00 pm]<br/>\r\n\r\nSend your inquiry by contact form. Click here to show the contact form: <a href=\"/contacts\">Contacts Now</a></p><br/>"
-  CmsBlocks_7:
     publishedat: '2012-10-22 14:58:50'
     var: end-footer
     title: endfooter
-    body: "<div class=\"footer-bar\">\r\n				<div class=\"center\">\r\n					<a href=\"#\" class=\"backToTop\">Back to Top</a><p>Follow us on <a href=\"#\">Twitter</a>, <a href=\"#\">Facebook</a> or <a href=\"#\">LinkedIn</a> to receive updates regarding network issues, discounts and more.<br>2012 &copy; Shine Software. All rights reserved. \r\n				</p></div>\r\n			</div>"
+    body: '<div class="alert alert-info text-center">Download this html section from https://gist.github.com/shinesoftware/7464788</div>'
