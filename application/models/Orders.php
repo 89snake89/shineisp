@@ -637,7 +637,7 @@ class Orders extends BaseOrders {
 					$details->description = $domain;
 					
 					// Register the domain paramenter registration
-					$details->parameters = json_encode ( array ('domain' => $domain, 'action' => 'registerDomain', 'tldid' => $product ['tld_id']));
+					$details->parameters = json_encode ( array ('domain' => array('name' => $domain, 'tld' => $product ['tld_id'], 'action' => 'registerDomain', 'authcode' => null)));
 					
 					$details->save ();
 					$orderitem_id = $details->getIncremented ();
@@ -703,7 +703,7 @@ class Orders extends BaseOrders {
 
 				// Get the number of the months to be sum to the expiration date of the domain
 				$parameters = json_decode($details ['parameters'], true);
-				$tldid = !empty($parameters['tldid']) ? $parameters['tldid'] : NULL;
+				$tldid = !empty($parameters['tld']) ? $parameters['tld'] : NULL;
 				$domain = !empty($parameters['domain']) ? $parameters['domain'] : NULL;
 					
 				// get the tld information
@@ -808,8 +808,8 @@ class Orders extends BaseOrders {
 				$order->uuid        = Shineisp_Commons_Uuid::generate();
 				$order->save();
 			
-				// Save order number
-				$order->order_number = self::formatOrderId($order->order_id);
+				// Create the public number but I need the order id
+				$order->order_number = self::formatOrderId($order->getIncremented());
 				$order->save();				
 
 				// Get the generated order id
@@ -835,7 +835,7 @@ class Orders extends BaseOrders {
 				if (count ( $products ) > 0) {
 					foreach ( $products as $product ) {
 						$orderitem = new OrdersItems ();
-
+						
 						if (!empty($product ['oldorderitemid']) && is_numeric ( $product ['oldorderitemid'] )) {
 							
 							// Find the details of the old order item details
@@ -851,21 +851,23 @@ class Orders extends BaseOrders {
 								
 								if ($product ['type'] == "service") {
 									
-									// Check if the product has some tax to be added
-									$tax = Taxes::getTaxbyProductID ( $oldOrderDetails [0] ['product_id'] );
-									
 									// Get the number of the months to be sum to the expiration date of the service
 									$date_end = Shineisp_Commons_Utilities::add_date ( date ( $oldOrderDetails [0] ['date_end'] ), null, BillingCycle::getMonthsNumber ( $oldOrderDetails [0] ['billing_cycle_id'] ) * $oldOrderDetails [0] ['quantity'] );
 									
 									$orderitem->date_start = $oldOrderDetails [0] ['date_end']; // The new order will have the date_end as date_start
 									$orderitem->date_end = Shineisp_Commons_Utilities::formatDateIn ($date_end);
-								
+									$orderitem->price = $oldOrderDetails [0] ['price'];
+									$orderitem->vat = $oldOrderDetails [0] ['vat'];
+									$orderitem->percentage = $oldOrderDetails [0] ['percentage'];
+									$orderitem->subtotal = $oldOrderDetails [0] ['subtotal'];
+									$orderitem->cost = $oldOrderDetails [0] ['cost'];
+									
 								} elseif ($product ['type'] == "domain") {
 									
 									// Get the number of the months to be sum to the expiration date of the domain
 									$parameters = json_decode($oldOrderDetails [0] ['parameters'], true);
-									$tldid = !empty($parameters['tldid']) ? $parameters['tldid'] : NULL;
-									$domain = !empty($parameters['domain']) ? $parameters['domain'] : NULL;
+									$tldid = !empty($parameters['tld']) ? $parameters['tld'] : NULL;
+									$domain = !empty($parameters['domain']['name']) ? $parameters['domain']['name'] : NULL;
 									
 									// get the tld information
 									$arrdomain = Shineisp_Commons_Utilities::getTld($domain);
@@ -875,6 +877,16 @@ class Orders extends BaseOrders {
 										if(!empty($tld['tld_id'])){
 											$tax = Taxes::getTaxbyTldID($tld['tld_id']);  // Check if the product has some tax to be added
 											$orderitem->tld_id = $tld['tld_id'];
+											
+											if(!empty($tld['tax_id'])){
+												$vat = ($tld ['renewal_price'] * $tax['percentage']) / 100;
+												$subtotal = ($tld ['renewal_price'] * ($tax['percentage'] + 100) / 100);
+												$percentage = $tax['percentage'];
+											}else{
+												$vat = 0;
+												$subtotal = $tld ['renewal_price'];
+												$percentage = 0;
+											}
 										}
 									}
 									
@@ -882,15 +894,18 @@ class Orders extends BaseOrders {
 									
 									$orderitem->date_start = $product ['expiring_date']; // The new order will have the date_end as date_start
 									$orderitem->date_end = Shineisp_Commons_Utilities::formatDateIn ($date_end);
-									$orderitem->parameters = json_encode ( array ('domain' => trim($domain), 'action' => 'renewDomain', 'tldid' => $tldid ) );
+									$orderitem->parameters = json_encode ( array ('domain' => array('name' => trim($domain), 'tldid' => $tldid, 'action' => 'renewDomain', 'authinfo' => null )));
+									$orderitem->vat = $vat;
+									$orderitem->percentage = $percentage;
+									$orderitem->subtotal = $subtotal;
+									$orderitem->price = $tld ['renewal_price'];
+									$orderitem->cost = $tld ['renewal_cost'];
 								}
 								
 								$orderitem->autorenew = $oldOrderDetails [0] ['autorenew'];
 								$orderitem->description = $oldOrderDetails [0] ['description'];
 								$orderitem->quantity = $oldOrderDetails [0] ['quantity'];
 								$orderitem->status_id = Statuses::id("tobepaid", "orders"); // To be payed status set
-								$orderitem->price = $oldOrderDetails [0] ['price'];
-								$orderitem->cost = $oldOrderDetails [0] ['cost'];
 								
 								$orderitem->save ();
 								$newOrderItemId = $orderitem->getIncremented ();
@@ -1137,6 +1152,21 @@ class Orders extends BaseOrders {
 			// Save the order item
 			if($orderitem->trySave()){
 
+				// Attach all the the domain to the order
+				if ("domain" == $item->getType()) { 
+					$domain = $options['domain']['name'];
+					$tld = $options['domain']['tld'];
+					
+					$domainId = Domains::Create($domain, $tld, $order->customer_id, $orderitem->detail_id);
+					if(is_numeric($domainId)){
+						$ordersitemsdomains = new OrdersItemsDomains ();
+						$ordersitemsdomains->domain_id = $domainId;
+						$ordersitemsdomains->order_id = $order['order_id'];
+						$ordersitemsdomains->orderitem_id = $orderitem->detail_id;
+						$ordersitemsdomains->save ();
+					}
+				}
+				
 				// Update the totals of the order
 				self::updateTotalsOrder($order['order_id']);
 				
@@ -1643,7 +1673,7 @@ class Orders extends BaseOrders {
 				
 		Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], 'order_deleted', array(
 			 'orderid'    => $order[0]['order_number']
-			,'fullname' => $customer['fullname']
+			,'fullname' => $customer['lastname']
 			,':shineisp:' => Isp::getActiveISP()
 			,'conditions' => strip_tags(Settings::findbyParam('conditions'))
 		), null, null, null, null, $customer['language_id']);
@@ -2719,36 +2749,6 @@ class Orders extends BaseOrders {
 	    return $records;
 	}
 	
-	/**
-	 * Get the product sold summary or per year
-	 */
-	public static function getProductSoldSummary($year=null){
-		$Session = new Zend_Session_Namespace ( 'Admin' );
-		$locale = $Session->langid;
-		
-		// Get the year incomes total and subtract the credit memo
-		$dq = Doctrine_Query::create ()->select('detail_id, count(*) as total,  pag.name as group, pd.name as product,')
-				->from ( 'OrdersItems oi' )
-				->leftJoin ( 'oi.Orders o' )
-				->leftJoin ( 'oi.Products p' )
-				->leftJoin ( "p.ProductsData pd WITH pd.language_id = $locale" )
-				->leftJoin ( 'p.ProductsAttributesGroups pag' )
-				->where('oi.status_id = ? OR oi.status_id = ?', array(Statuses::id('paid', 'orders'), Statuses::id('complete', 'orders')))
-				->andWhere('p.isp_id = ?', Isp::getCurrentId())
-				->groupBy('pd.name')
-				->orderBy('count(*) desc');
-		
-		if(is_numeric($year)){
-			$dq->andWhere('Year(o.order_date) = ?', $year);
-		}
-		
-		$data = $dq->execute ( null, Doctrine::HYDRATE_ARRAY );
-		
-		return $data;
-		
-		
-	}
-	
 	######################################### CRON METHODS ############################################
 	
 	/**
@@ -2822,6 +2822,7 @@ class Orders extends BaseOrders {
 			
 			Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], $template, array(
 				 'orderid'    => !empty($order['order_number']) ? $order['order_number'] : $order['order_id']
+				,'fullname' => $customer['fullname']
 				,':shineisp:' => $customer
 				,'url'        => $customer_url
 			), null, null, null, null, $customer['language_id']);
@@ -2888,7 +2889,7 @@ class Orders extends BaseOrders {
 		*/
 	
 		// Get all the active domains that expire in 1 day
-		$domains = Domains::getExpiringDomainsByRange ( 0, 30, 4 );
+		$domains = Domains::getExpiringDomainsByRange ( 0, 30, Statuses::id('active', 'domains') );
 		
 		if ($domains) {
 			// Create the customer group list for the email summary
@@ -2914,14 +2915,14 @@ class Orders extends BaseOrders {
 				$i ++;
 			}
 		}
-
+		
 		/*
 		 * Now we have to get the services expired and we have to sum the previous $customers array with these
 		* new information.
 		*/
 	
 		// Get all the services active that expire the day after
-		$services = OrdersItems::getExpiringSerivcesByRange(0, 30, Statuses::id("complete", "orders") );
+		$services = OrdersItems::getExpiringServicesByRange(0, 30, Statuses::id("complete", "orders") );
 		if ($services) {
 			// Create the customer group list for the email summary
 			foreach ( $services as $service ) {
@@ -2978,12 +2979,12 @@ class Orders extends BaseOrders {
 				if (! empty ( $items )) {
 					Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], 'reminder', array(
 						'items'      => $items
-						,':shineisp:' => $customer
+						,'fullname' => $customer['fullname']
 					), null, null, null, null, $customer['language_id']);
 				}
 			}
 		}
-	
+
 		return true;
 	}
 	
