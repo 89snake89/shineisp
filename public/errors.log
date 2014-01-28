@@ -41,3 +41,72 @@
 [15-Jan-2014 08:05:06 CET] PHP Warning:  Creating default object from empty value in /Library/WebServer/Documents/shineisp/application/models/DomainsNichandle.php on line 96
 [15-Jan-2014 08:05:06 CET] PHP Fatal error:  Call to undefined method stdClass::trySave() in /Library/WebServer/Documents/shineisp/application/models/DomainsNichandle.php on line 100
 [15-Jan-2014 08:07:58 CET] PHP Fatal error:  Call to undefined method Doctrine_Collection::getNicId() in /Library/WebServer/Documents/shineisp/application/models/DomainsNichandle.php on line 91
+[15-Jan-2014 17:16:17 CET] PHP Notice:  Undefined variable: id in /Library/WebServer/Documents/shineisp/application/modules/admin/controllers/DomainsprofilesController.php on line 270
+[15-Jan-2014 17:20:43 CET] PHP Warning:  parse_str(): Input variables exceeded 1000. To increase the limit change max_input_vars in php.ini. in /Library/WebServer/Documents/shineisp/library/Shineisp/Controller/Action/Helper/Ajaxgrid.php on line 145
+[16-Jan-2014 12:29:14 CET] PHP Notice:  Undefined variable: nicHandle in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Registrars/Ovh/Main.php on line 75
+[16-Jan-2014 12:31:46 CET] PHP Notice:  Undefined variable: nicHandle in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Registrars/Ovh/Main.php on line 75
+[16-Jan-2014 17:50:25 CET] PHP Notice:  Undefined index: Domains in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 200
+[16-Jan-2014 17:50:25 CET] PHP Notice:  Undefined index: Domains in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 200
+[16-Jan-2014 17:51:11 CET] PHP Notice:  Undefined index: Domains in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 200
+[16-Jan-2014 17:51:11 CET] PHP Notice:  Undefined index: Domains in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 200
+[16-Jan-2014 17:53:55 CET] PHP Notice:  Undefined index: domain in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 274
+[16-Jan-2014 17:53:56 CET] PHP Notice:  Undefined index: domain in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 275
+[16-Jan-2014 17:54:57 CET] PHP Notice:  Undefined variable: shineisp in /Library/WebServer/Documents/shineisp/application/modules/system/controllers/TasksController.php on line 273
+[17-Jan-2014 08:54:38 CET] PHP Notice:  Undefined index: customer_id in /Library/WebServer/Documents/shineisp/application/models/DomainsProfiles.php on line 200
+[17-Jan-2014 09:10:37 CET] PHP Catchable fatal error:  Argument 1 passed to Zend_Form::populate() must be of the type array, null given, called in /Library/WebServer/Documents/shineisp/application/modules/default/controllers/DomainsController.php on line 465 and defined in /Library/WebServer/Documents/shineisp/library/Zend/Form.php on line 2056
+[17-Jan-2014 09:32:40 CET] PHP Fatal error:  Call to a member function isErrors() on a non-object in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/header.phtml on line 4
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'controller' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'action' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'controller' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'action' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'controller' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'action' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'controller' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'action' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:18 CET] PHP Warning:  Illegal string offset 'controller' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 09:48:19 CET] PHP Warning:  Illegal string offset 'action' in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/partials/simplegrid.phtml on line 49
+[17-Jan-2014 10:43:22 CET] PHP Fatal error:  Call to a member function render() on a non-object in /Library/WebServer/Documents/shineisp/application/modules/default/views/scripts/domains/customform.phtml on line 133
+[17-Jan-2014 10:44:32 CET] PHP Fatal error:  Call to a member function setAllowEmpty() on a non-object in /Library/WebServer/Documents/shineisp/application/modules/default/forms/DomainsForm.php on line 93
+[17-Jan-2014 12:01:09 CET] PHP Notice:  Undefined variable: domain_id in /Library/WebServer/Documents/shineisp/application/modules/default/controllers/DomainsController.php on line 182
+[17-Jan-2014 12:01:09 CET] PHP Notice:  Undefined variable: domain_id in /Library/WebServer/Documents/shineisp/application/modules/default/controllers/DomainsController.php on line 183
+[17-Jan-2014 12:01:09 CET] PHP Notice:  Undefined variable: domain_id in /Library/WebServer/Documents/shineisp/application/modules/default/controllers/DomainsController.php on line 184
+[17-Jan-2014 12:01:09 CET] PHP Notice:  Undefined variable: domain_id in /Library/WebServer/Documents/shineisp/application/modules/default/controllers/DomainsController.php on line 185
+[18-Jan-2014 12:42:05 CET] PHP Fatal error:  Uncaught exception 'ReflectionException' with message 'Class Shineisp_Plugins_Calendar_Main does not exist' in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php:56
+Stack trace:
+#0 /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php(56): ReflectionClass->__construct('Shineisp_Plugin...')
+#1 /Library/WebServer/Documents/shineisp/application/Bootstrap.php(63): Shineisp_Plugins->initAll()
+#2 /Library/WebServer/Documents/shineisp/library/Zend/Application/Bootstrap/BootstrapAbstract.php(669): Bootstrap->_initControllerPlugin()
+#3 /Library/WebServer/Documents/shineisp/library/Zend/Application/Bootstrap/BootstrapAbstract.php(622): Zend_Application_Bootstrap_BootstrapAbstract->_executeResource('controllerplugi...')
+#4 /Library/WebServer/Documents/shineisp/library/Zend/Application/Bootstrap/BootstrapAbstract.php(586): Zend_Application_Bootstrap_BootstrapAbstract->_bootstrap(NULL)
+#5 /Library/WebServer/Documents/shineisp/library/Zend/Application.php(355): Zend_Application_Bootstrap_Bootst in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php on line 56
+[18-Jan-2014 12:42:05 CET] PHP Fatal error:  Uncaught exception 'ReflectionException' with message 'Class Shineisp_Plugins_Calendar_Main does not exist' in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php:56
+Stack trace:
+#0 /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php(56): ReflectionClass->__construct('Shineisp_Plugin...')
+#1 /Library/WebServer/Documents/shineisp/application/Bootstrap.php(63): Shineisp_Plugins->initAll()
+#2 /Library/WebServer/Documents/shineisp/library/Zend/Application/Bootstrap/BootstrapAbstract.php(669): Bootstrap->_initControllerPlugin()
+#3 /Library/WebServer/Documents/shineisp/library/Zend/Application/Bootstrap/BootstrapAbstract.php(622): Zend_Application_Bootstrap_BootstrapAbstract->_executeResource('controllerplugi...')
+#4 /Library/WebServer/Documents/shineisp/library/Zend/Application/Bootstrap/BootstrapAbstract.php(586): Zend_Application_Bootstrap_BootstrapAbstract->_bootstrap(NULL)
+#5 /Library/WebServer/Documents/shineisp/library/Zend/Application.php(355): Zend_Application_Bootstrap_Bootst in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php on line 56
+[18-Jan-2014 12:50:44 CET] PHP Warning:  simplexml_load_file(): /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/config.xml:22: parser error : expected '&gt;' in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php on line 74
+[18-Jan-2014 12:50:44 CET] PHP Warning:  simplexml_load_file():     &lt;settings&gt; in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php on line 74
+[18-Jan-2014 12:50:44 CET] PHP Warning:  simplexml_load_file():     ^ in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php on line 74
+[18-Jan-2014 12:50:44 CET] PHP Fatal error:  Call to a member function attributes() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins.php on line 78
+[20-Jan-2014 08:14:58 CET] PHP Catchable fatal error:  Argument 1 passed to Shineisp_Plugins_Calendar_Main::newEvent() must be an instance of Google_CalendarService, string given, called in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 65 and defined in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 122
+[20-Jan-2014 08:36:39 CET] PHP Notice:  Undefined variable: cal in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 218
+[20-Jan-2014 08:36:39 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 218
+[20-Jan-2014 08:36:39 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 218
+[20-Jan-2014 19:00:54 CET] PHP Notice:  Undefined variable: result in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 228
+[20-Jan-2014 19:01:43 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:43 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:54 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:54 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:56 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:56 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:57 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:57 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:58 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:58 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:59 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:01:59 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:02:15 CET] PHP Notice:  Trying to get property of non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231
+[20-Jan-2014 19:02:15 CET] PHP Fatal error:  Call to a member function listCalendarList() on a non-object in /Library/WebServer/Documents/shineisp/library/Shineisp/Plugins/Calendar/Main.php on line 231

@@ -88,6 +88,7 @@ class DomainsTasks extends BaseDomainsTasks {
 	public static function getById($id, $fields = "*", $retarray = false) {
 		$dq = Doctrine_Query::create ()->select ( $fields )
 		->from ( 'DomainsTasks t' )
+		->leftJoin('t.Domains d')->leftJoin('d.DomainsTlds tld')->leftJoin('tld.WhoisServers w')
 		->where ( "t.task_id = ?", $id )
 		->limit ( 1 );
 	
@@ -247,7 +248,6 @@ class DomainsTasks extends BaseDomainsTasks {
 		$task = new DomainsTasks ( );
 		$task->startdate = date ( 'Y-m-d H:i:s' );
 		$task->action = $action;
-		$task->domain = $domain;
 		$task->domain_id = Domains::getDomainIDbyName($domain);
 		$task->registrars_id = Registrars::findRegistrarIDbyDomain($domain);
 		$task->status_id = Statuses::id('active', 'domains_tasks'); //Domains Task Status;
@@ -324,25 +324,27 @@ class DomainsTasks extends BaseDomainsTasks {
 		$dq = Doctrine_Query::create ()
 								->select("DATE_FORMAT(startdate, '".Settings::getMySQLDateFormat('dateformat')." %H:%i:%s') as startdate, 
 										  DATE_FORMAT(enddate, '".Settings::getMySQLDateFormat('dateformat')." %H:%i:%s') as enddate,
-										  domain,
+										  CONCAT(d.domain, '.', w.tld) as domain, 
 										  action,
 										  log,
 										  s.status as status")
 								->from ( 'DomainsTasks dt' )
 								->leftJoin( 'dt.Statuses s' )
+								->leftJoin( 'dt.Domains d' )
+								->leftJoin('d.DomainsTlds t')
+								->leftJoin('t.WhoisServers w')
+								->leftJoin( 'd.Customers c' )
 								->orderBy('dt.startdate desc')
 								->limit($limit);
 							
         $auth = Zend_Auth::getInstance ();
         if( $auth->hasIdentity () ) {
             $logged_user= $auth->getIdentity ();
-            $dq->leftJoin( 'dt.Domains d' )
-               ->leftJoin( 'd.Customers c' )
-               ->whereIn( "c.isp_id", $logged_user['isp_id']);
+            $dq->whereIn( "c.isp_id", $logged_user['isp_id']);
         }
 
         $records['data'] = $dq->execute ( array (), Doctrine_Core::HYDRATE_ARRAY );
-        
+
         // adding the index reference
         $records['index'] = "task_id";
         
@@ -354,7 +356,8 @@ class DomainsTasks extends BaseDomainsTasks {
 					        		'log' => array('label' => $translator->translate('Log'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
 					        		'status' => array('label' => $translator->translate('Status')));
         
-		return $records;
+       
+        return $records;
 	}
 	
 

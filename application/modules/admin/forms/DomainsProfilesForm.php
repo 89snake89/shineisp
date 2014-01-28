@@ -9,7 +9,8 @@ class Admin_Form_DomainsProfilesForm extends Zend_Form
     	
 
     	$this->addElement('select', 'customer_id', array(
-    	        'label' => $translate->_('Customer'),
+    	        'label' => $translate->_('Owner of the domain profile'),
+    	        'description' => $translate->_('This is the customer who has created the domain profiles.'),
     	        'decorators' => array('Bootstrap'),
     	        'class'      => 'form-control'
     	));
@@ -43,7 +44,7 @@ class Admin_Form_DomainsProfilesForm extends Zend_Form
         
         $this->getElement('gender')
                   ->setAllowEmpty(true)
-                  ->setMultiOptions(array('M'=>'Man', 'F'=>'Female'));
+                  ->setMultiOptions(array('M'=> $translate->translate('Man'), 'F'=> $translate->translate('Female')));
         
         $this->addElement('text', 'birthdate', array(
             'filters'    => array('StringTrim'),
@@ -149,11 +150,19 @@ class Admin_Form_DomainsProfilesForm extends Zend_Form
             'class'      => 'form-control'
         ));
         
-        $this->addElement('text', 'country', array(
-				        'label' => $translate->_('Country'),
-				        'decorators' => array('Bootstrap'),
-				        'class'      => 'form-control')
+        
+        $this->addElement('select', 'country_id', array(
+        		'label' => $translate->_('Country'),
+        		'decorators' => array('Bootstrap'),
+        		'class'      => 'form-control',
+        		'onchange'   => 'onChangeCountry( this );')
         );
+        
+        
+        $this->getElement('country_id')
+				        ->setAllowEmpty(false)
+				        ->setMultiOptions(Countries::getList( true ))
+				        ->setRequired(true);
         
         $this->addElement('text', 'phone', array(
             'filters'    => array('StringTrim'),
