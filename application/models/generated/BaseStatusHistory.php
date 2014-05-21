@@ -10,8 +10,11 @@ Doctrine_Manager::getInstance()->bindComponent('StatusHistory', 'doctrine');
  * @property integer $history_id
  * @property timestamp $datetime
  * @property integer $status_id
- * @property integer $section_id
+ * @property integer $order_id
+ * @property integer $ticket_id
  * @property Statuses $Statuses
+ * @property Orders $Orders
+ * @property Tickets $Tickets
  * 
  * @package    ##PACKAGE##
  * @subpackage ##SUBPACKAGE##
@@ -41,9 +44,12 @@ abstract class BaseStatusHistory extends Doctrine_Record
              'notnull' => true,
              'length' => '4',
              ));
-        $this->hasColumn('section_id', 'integer', 4, array(
+        $this->hasColumn('order_id', 'integer', 4, array(
              'type' => 'integer',
-             'notnull' => true,
+             'length' => '4',
+             ));
+        $this->hasColumn('ticket_id', 'integer', 4, array(
+             'type' => 'integer',
              'length' => '4',
              ));
     }
@@ -54,6 +60,16 @@ abstract class BaseStatusHistory extends Doctrine_Record
         $this->hasOne('Statuses', array(
              'local' => 'status_id',
              'foreign' => 'status_id',
+             'onDelete' => 'CASCADE'));
+
+        $this->hasOne('Orders', array(
+             'local' => 'order_id',
+             'foreign' => 'order_id',
+             'onDelete' => 'CASCADE'));
+
+        $this->hasOne('Tickets', array(
+             'local' => 'ticket_id',
+             'foreign' => 'ticket_id',
              'onDelete' => 'CASCADE'));
     }
 }

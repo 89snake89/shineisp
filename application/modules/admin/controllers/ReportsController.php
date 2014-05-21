@@ -97,7 +97,7 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 				}
 				
 				$this->view->title = $this->translator->translate("Products summary");
-				$this->view->data = array ('records' => Orders::getProductSoldSummary ($param));
+				$this->view->data = array ('records' => Products::getBestseller($param));
 				break;
 			
 			case 'tldsummarypermonth' :
@@ -130,7 +130,7 @@ class Admin_ReportsController extends Shineisp_Controller_Admin {
 				$graphdata = $graph->setType('Donut')
 										->setData(Domains::prepareGraphData ())
 										->setElement('graph')
-										->plot(true);
+										->plot();
 					
 				$this->view->placeholder ( "admin_endbody" )->append ($graphdata);
 				

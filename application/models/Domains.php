@@ -66,6 +66,7 @@ class Domains extends BaseDomains {
 		$massactions['bulk_set_autorenew&status=0'] = "Disable Automatic Renewal";
 		$massactions['bulk_delete'] = 'Mass Delete';
 		$massactions['bulk_export'] = 'Export Domain Listing';
+		$massactions['bulk_check_dns'] = 'Check DNS Zone';
 		$config ['datagrid'] ['massactions']['common'] = $massactions;
 													
 		$statuses = Statuses::getList('domains');
@@ -78,14 +79,16 @@ class Domains extends BaseDomains {
 			$config ['datagrid'] ['massactions']['statuses'] = $customacts;
 			
 		
-		$actions = Registrars::getActions (1);
+	    $actions = Registrars::getActions ();
 		if(!empty($actions))
-			$customacts = array();
-			foreach ($actions as $key => $value) {
-				$customacts['bulk_registrar_tasks&task=' . $key ] = "Registrar Task: $value";
-			}
-			$config ['datagrid'] ['massactions']['registrar'] = $customacts;
-				
+		    $customacts = array();
+    		foreach ($actions as $registrar => $tasks) {
+    		    foreach ($tasks as $action => $label) {
+        		    $customacts['bulk_registrar_tasks&task=' . $action ] = $translator->_('%s registrar task: %s', $registrar, $label);
+        		}
+    		}
+    		
+    	$config ['datagrid'] ['massactions']['registrars'] = $customacts;
 		return $config;
 	}
 	
@@ -504,10 +507,10 @@ class Domains extends BaseDomains {
      * @param $autorenew [0, 1]
      * @return array()
      */
-    public static function getExpiringDomainsByDays($days=7, $status = "", $autorenew=null) {
+    public static function getExpiringDomainsByDays($days=7, $statusId = null, $autorenew=null) {
     	
-        if(!is_numeric($status)){
-			$status = Statuses::id("active", "domains");
+        if(!is_numeric($statusId)){
+			$statusId = Statuses::id("active", "domains");
 		}
 		    	
         $dq = Doctrine_Query::create ()->select ( "domain_id, 
@@ -533,8 +536,8 @@ class Domains extends BaseDomains {
         	$dq->andWhere ( 'DATEDIFF(d.expiring_date, CURRENT_DATE) = ?', $days );
         }
         
-        if(is_numeric($status)){
-        	$dq->andWhere ( 'd.status_id = ?', $status ); // status 4 is active. Check the database statuses table
+        if(is_numeric($statusId)){
+        	$dq->andWhere ( 'd.status_id = ?', $statusId );
         }
         
         if(is_numeric($autorenew)){
@@ -623,7 +626,7 @@ class Domains extends BaseDomains {
 		$from = is_numeric($from) ? intval($from)     : 31;
 		$to   = is_numeric($to)   ? intval($to) * -1  : -2; // force a negative value
 			
-		$fields = "d.domain_id, CONCAT(d.domain, '.', d.tld) as domains, 
+		$fields = "d.domain_id, CONCAT(domain, '.', ws.tld) as domains, 
 		       DATE_FORMAT(d.expiring_date, '".Settings::getMySQLDateFormat('dateformat')."') as expiringdate, 
 		       DATEDIFF(expiring_date, CURRENT_DATE) as days,
 		       IF(d.autorenew = 1, 'YES', 'NO') as renew";
@@ -634,6 +637,8 @@ class Domains extends BaseDomains {
 		                     ->leftjoin ( 'd.OrdersItems oi' )
 		                     ->leftjoin ( 'd.Statuses s' )
                              ->leftJoin ( 'd.Customers c' )
+                             ->leftJoin ( 'd.DomainsTlds dt' )
+                             ->leftJoin ( 'dt.WhoisServers ws' )
 		                     ->where ( 'DATEDIFF(expiring_date, CURRENT_DATE) <= ' . $from )
 		                     ->addWhere ( 'DATEDIFF(expiring_date, CURRENT_DATE) >= ' . $to )
                              ->addWhere( "c.isp_id = ?", Isp::getCurrentId() )
@@ -949,6 +954,35 @@ class Domains extends BaseDomains {
 	}
 	
 	/**
+	 * Get the domain tld by id
+	 * @param $id
+	 * @return string
+	 */
+	public static function getDomainTld($id) {
+		try {
+			$dq = Doctrine_Query::create ()
+										->select('ws.tld as tld')
+										->from ( 'Domains d' )
+										->leftJoin ( 'd.DomainsTlds dt' )
+										->leftJoin ( 'dt.WhoisServers ws' )
+                                        ->leftJoin ( 'd.Customers c' )
+										->where ( "domain_id = ?", $id )
+                                        ->addWhere( "c.isp_id = ?", Isp::getCurrentId() )
+										->limit ( 1 );
+				
+			$record = $dq->execute ( array (), Doctrine_Core::HYDRATE_ARRAY  );
+			
+			if(!empty($record)){
+				return $record[0]['tld'];
+			}
+			
+		} catch ( Exception $e ) {
+			die ( $e->getMessage () );
+		}
+		return false;
+	}
+	
+	/**
 	 * getAllInfo
 	 * Get all data from domain ID
 	 * @param $id
@@ -1070,6 +1104,54 @@ class Domains extends BaseDomains {
 			}
 		}
 	}	
+	
+	/**
+	 * Save the domain information
+	 * 
+	 * @param integer|null $id
+	 * @param array $params
+	 * @return Ambigous <unknown, number, NULL, mixed>
+	 */
+	public static function saveAll($id, $params) {
+
+	    if (is_numeric ( $id )) {
+	        $domains = Doctrine::getTable ( 'Domains' )->find ( $id );
+	    }else{
+	        $domains = new Domains();
+	    }
+	    	
+	    // Get the TLD information
+	    $tldInfo = DomainsTlds::getAllInfo($params ['tld_id']);
+	    
+	    $params ['creation_date'] = empty ( $params ['creation_date'] ) ? date ( 'Y-m-d' ) : Shineisp_Commons_Utilities::formatDateIn ( $params ['creation_date'] );
+	    
+	    // Set the new values
+	    $domains->domain = $params ['domain'];
+	    if( isset($tldInfo['WhoisServers']) ) {
+	        $domains->tld = $tldInfo['WhoisServers']['tld'];
+	    }
+	    $domains->tld_id = $params ['tld_id'];
+	    $domains->authinfocode = $params ['authinfocode'];
+	    $domains->creation_date = $params ['creation_date'];
+	    $domains->modification_date = date ( 'Y-m-d' );
+	    	
+	    if (! empty ( $params ['expiring_date'] )) {
+	        $domains->expiring_date = Shineisp_Commons_Utilities::formatDateIn ( $params ['expiring_date'] );
+	    }
+	    
+	    $domains->customer_id = $params ['customer_id'];
+	    $domains->note = $params ['note'];
+	    $domains->registrars_id = ! empty ( $params ['registrars_id'] ) ? $params ['registrars_id'] : Null;
+	    $domains->status_id = $params ['status_id'] ? $params ['status_id'] : null;
+	    	
+	    // Save the data
+	    if($domains->trySave ()){
+	        $id = is_numeric ( $id ) ? $id : $domains->getIncremented ();
+	        return $id;
+	    }
+	    
+	    return false;
+	}
 
 	/**
 	 * ownerGrid
@@ -1163,6 +1245,17 @@ class Domains extends BaseDomains {
 		return null;
 	}
 
+	
+	/**
+	 * Get a record by ID
+	 * @param $id
+	 * @return Doctrine Record
+	 */
+	public static function findbyId($id) {
+		$dq = Doctrine_Query::create ()->from ( 'Domains d' )->where ( "d.domain_id = ?", $id )->limit(1);
+		$record = $dq->execute ( array (), Doctrine_Core::HYDRATE_ARRAY );
+		return !empty($record[0]) ? $record[0] : null;
+	}
 	
 	/**
 	 * find
@@ -1455,23 +1548,22 @@ class Domains extends BaseDomains {
 		return $data;
 	}	
 	
-	/*
-	 * cmp
-	 * Sorting function
-	 */
-	static function cmp($a, $b) {
-		if ($a ["total"] == $b ["total"]) {
-			return 0;
-		}
-		return ($a ["total"] < $b ["total"]) ? - 1 : 1;
-	}
+// 	/*
+// 	 * cmp
+// 	 * Sorting function
+// 	 */
+// 	static function cmp($a, $b) {
+// 		if ($a ["total"] == $b ["total"]) {
+// 			return 0;
+// 		}
+// 		return ($a ["total"] < $b ["total"]) ? - 1 : 1;
+// 	}
 	
 	/**
 	 * Summary of all the domain stautus
 	 * @return array
 	 */
 	public static function summary() {
-		$chart = "";
 		$translator = Shineisp_Registry::getInstance ()->Zend_Translate;
 		
 		$dq = Doctrine_Query::create ()
@@ -1485,30 +1577,8 @@ class Domains extends BaseDomains {
         
         $records    = $dq->execute(array (), Doctrine_Core::HYDRATE_ARRAY);
 	
-		// Strip the customer_id field
-		if(!empty($records)){
-			foreach($records as $key => $value) {
-			  	array_shift($value);
-			  	$newarray[]       = $value;
-			  	$chartLabels[]    = $value['status'];
-			  	$chartValues[]    = $value['items'];
-			}
-			// Chart link
-			$chart = "https://chart.googleapis.com/chart?chs=250x100&chd=t:".implode(",", $chartValues)."&cht=p3&chl=".implode("|", $chartLabels);
-		}
-		
-		$dq = Doctrine_Query::create ()
-				->select ( "domain_id, count(*) as items" )
-				->from ( 'Domains d' )
-                ->leftJoin ( 'd.Customers c' )
-                ->addWhere( "c.isp_id = ?", Isp::getCurrentId() );
-                                    
-        
-        $record_group2  =  $dq->execute(array (), Doctrine_Core::HYDRATE_ARRAY);
-		
-		$records['data'] = $newarray;
+		$records['data'] = $records;
 		$records['fields'] = array('items' => array('label' => $translator->translate('Items')), 'status' => array('label' => $translator->translate('Status')));
-		$records['chart'] = $chart;
 		
 		return $records;
 	}	
@@ -1573,6 +1643,51 @@ class Domains extends BaseDomains {
 		return false;
 	}
 		
+	/**
+	 * Check the dns of the active domains
+	 * @return array
+	 */
+	public static function bulk_check_dns($items) {
+		$external_domains = array();
+		$internal_domains = array();
+		$translator = Shineisp_Registry::getInstance ()->Zend_Translate;
+		$mex = "";
+		
+		// Get all the active domains
+		$domains = self::get_domains($items, "d.domain_id, CONCAT(d.domain, '.', ws.tld) as name");
+	
+		// Get the webserver information
+		$webserver = Servers::getWebserver();
+	
+		// For each domain do ...
+		foreach ($domains as $domain){
+	
+			// Get the DNS information about the domain
+			$records = dns_get_record($domain['name'], DNS_A + DNS_NS);
+				
+			// For each DNS records found
+			foreach ($records as $record){
+				if((!empty($record['type']) && $record['type'] == "A")){
+					if($record['ip'] != $webserver['ip']){
+						$external_domains[] = $translator->_('The domain %s redirects the requests at this IP address: %s. read more here (%s)', $domain['name'], $record['ip'], "<a href=\"/admin/domains/edit/id/" . $domain['domain_id'] . "\">".$domain['name']."</a>");
+					}else{
+						$internal_domains[] = $translator->_('The domain %s located in our servers.', $domain['name']);
+					}
+				}
+			}
+		}
+		
+		if(!empty($external_domains)){
+			$mex = "<ul class=\"list-unstyled\"><li><span class=\"label label-danger\">".$translator->translate('Warning')."</span> " . implode( '</li><li><span class="label label-danger">'.$translator->translate('Warning').'</span> ', $external_domains) . "</li></ul>";
+		}
+		
+		if(!empty($internal_domains)){ 
+			$mex .= "<ul class=\"list-unstyled\"><li><span class=\"label label-success\">".$translator->translate('Success')."</span> " . implode( '</li><li><span class="label label-success">'.$translator->translate('Success').'</span> ', $internal_domains) . "</li></ul>"; 
+		}
+		
+		die ( json_encode ( array ('mex' => $mex, 'autoreload_disabled' => true ) ) );
+	}
+	
 	/**
 	 * export the content in a pdf file
 	 * @param array $items

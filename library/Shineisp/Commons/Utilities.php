@@ -231,13 +231,13 @@ class Shineisp_Commons_Utilities {
 	    }
 	 
 	    // Start the table
-	    $table = "<table id='$id'>\n";
+	    $table = "<table width='100%' id='$id'>\n";
 	 
 	    // The header
 	    $table .= "\t<tr>";
 	    // Take the keys from the first row as the headings
 	    foreach (array_keys($array[0]) as $heading) {
-	        $table .= '<th>' . $heading . '</th>';
+	        $table .= '<td>' . $heading . '</td>';
 	    }
 	    $table .= "</tr>\n";
 	 
@@ -1067,8 +1067,10 @@ class Shineisp_Commons_Utilities {
 	 * @param array|string $replyto
 	 * @param array $ISP
 	 * @param integer $language_id
+	 * @param string $bcc
 	 */
-	public static function sendEmailTemplate($recipient = null, $template = '', $placeholders = array(), $inreplyto = null, $attachments = null, $replyto = null, $ISP = null, $language_id = null) {
+	public static function sendEmailTemplate($recipient = null, $template = '', $placeholders = array(), $inreplyto = null, 
+			$attachments = null, $replyto = null, $ISP = null, $language_id = null, $bcc = null) {
 		
 		// Get email template
 		$arrTemplate = self::getEmailTemplate($template, $language_id);
@@ -1121,6 +1123,11 @@ class Shineisp_Commons_Utilities {
 			} else {
 				$arrBCC[] = $arrTemplate['bcc'];
 			}
+		}
+		
+		// add hidden email address
+		if(!empty($bcc)){
+			$arrBCC[] = $bcc;
 		}
 		
 		// Get always-bcc from custom settings

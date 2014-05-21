@@ -24,10 +24,11 @@ class OrdersItems extends BaseOrdersItems {
 		$config ['datagrid'] ['columns'] [] = array ('label' => null, 'field' => 'd.detail_id', 'alias' => 'id', 'type' => 'selectall' );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'ID' ), 'field' => 'd.detail_id', 'alias' => 'id', 'sortable' => true, 'searchable' => true, 'type' => 'string' );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Order ID' ), 'field' => 'o.order_id', 'alias' => 'order_id', 'sortable' => true, 'searchable' => true, 'type' => 'string', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
-		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Service' ), 'field' => 'pd.name', 'alias' => 'productname', 'sortable' => true, 'searchable' => true, 'type' => 'string' );
+		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Type' ), 'field' => 'p.type', 'alias' => 'type', 'sortable' => true, 'searchable' => true, 'type' => 'string' );
+		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Service' ), 'field' => 'pd.name', 'alias' => 'productname', 'sortable' => true, 'searchable' => true, 'type' => 'link', 'link' => array('idx' => 'product_id', 'href' => '/admin/products/edit/id/%s') );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Domain' ), 'field' => 'dm.domain', 'alias' => 'domain', 'sortable' => true, 'searchable' => true, 'type' => 'string', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
-		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Company' ), 'field' => 'c.company', 'alias' => 'company', 'sortable' => true, 'searchable' => true, 'type' => 'string', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
-		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Last name' ), 'field' => 'c.lastname', 'alias' => 'lastname', 'sortable' => true, 'searchable' => true, 'type' => 'string', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
+		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Company' ), 'field' => 'c.company', 'alias' => 'company', 'sortable' => true, 'searchable' => true, 'type' => 'link', 'link' => array('idx' => 'customer_id', 'href' => '/admin/customers/edit/id/%s'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
+		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Last name' ), 'field' => 'c.lastname', 'alias' => 'lastname', 'sortable' => true, 'searchable' => true, 'type' => 'link', 'link' => array('idx' => 'customer_id', 'href' => '/admin/customers/edit/id/%s'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Days left' ), 'field' => 'd.date_end', 'alias' => 'daysleft', 'sortable' => true, 'searchable' => false, 'type' => 'integer', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'Start date' ), 'field' => 'd.date_start', 'alias' => 'date_start', 'sortable' => true, 'searchable' => true, 'type' => 'date', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
 		$config ['datagrid'] ['columns'] [] = array ('label' => $translator->translate ( 'End date' ), 'field' => 'd.date_end', 'alias' => 'date_end', 'sortable' => true, 'searchable' => true, 'type' => 'date', 'attributes' => array('class' => 'visible-lg visible-md hidden-xs') );
@@ -35,6 +36,7 @@ class OrdersItems extends BaseOrdersItems {
 		
 		$config ['datagrid'] ['fields'] =  "d.detail_id as id,
 											o.order_number as order_id, 
+											p.product_id as product_id, 
 											c.customer_id as customer_id, 
 											c.company as company, 
 											c.lastname as lastname,
@@ -42,6 +44,7 @@ class OrdersItems extends BaseOrdersItems {
 											DATE_FORMAT(d.date_start, '".Settings::getMySQLDateFormat('dateformat')."') as date_start, 
 											DATE_FORMAT(d.date_end, '".Settings::getMySQLDateFormat('dateformat')."') as date_end, 
 											pd.name as productname, 
+											p.type as type, 
 											s.status as status, 
 											oid.relationship_id as oid,
 											dm.domain_id as domain_id,
@@ -66,7 +69,6 @@ class OrdersItems extends BaseOrdersItems {
         			->andWhere('o.isp_id = ?', Shineisp_Registry::get('ISP')->isp_id);
         
 		$config ['datagrid'] ['dqrecordset'] = $dq;
-			
 		
 		$config ['datagrid'] ['basepath'] = "/admin/services/";
 		$config ['datagrid'] ['index'] = "detail_id";
@@ -80,6 +82,18 @@ class OrdersItems extends BaseOrdersItems {
 		$config ['datagrid'] ['buttons'] ['delete'] ['cssicon'] = "delete";
 		$config ['datagrid'] ['buttons'] ['delete'] ['action'] = "/admin/services/delete/id/%d";
 		$config ['datagrid'] ['massactions']['common'] = array ('massdelete'=>'Mass Delete', 'bulkexport'=>'Export' );
+		
+		$customacts = array();
+		$actions = Panels::getActions ();
+		if(!empty($actions))
+    		foreach ($actions as $registrar => $tasks) {
+    		    foreach ($tasks as $action => $label) {
+        		    $customacts['bulk_registrar_tasks&task=' . $action ] = $translator->_('%s registrar task: %s', $registrar, $label);
+        		}
+    		}
+    		
+		$config ['datagrid'] ['massactions']['panels'] = $customacts;
+		
 		return $config;
 	}
 	
@@ -213,17 +227,17 @@ class OrdersItems extends BaseOrdersItems {
 		
 
     /**
-     * getExpiringSerivcesByRange
      * Get all the services from the order details bought by the customers and by days range
-     * @param integer $from
-     * @param integer $to
+     * @param integer $from [0 days]
+     * @param integer $to [30 days]
      * @param integer $status
      * @param integer $autorenew [0, 1]
      */
-    public static function getExpiringSerivcesByRange($from, $to, $status="", $autorenew=null) {
-
+    public static function getExpiringServicesByRange($from=null, $to=null, $status=null, $autorenew=null, array $types = array(), array $attributegrpcode = array()) {
+    	$currency   = Shineisp_Registry::getInstance ()->Zend_Currency;
+    	
     	try{
-	    	$dq = Doctrine_Query::create ()->select ( "oi.detail_id, 
+	    	$dq = Doctrine_Query::create ()->select ( "oi.detail_id, oi.price as price, oid.relationship_id,
 	        										   pd.name as product,
 	        										   c.customer_id as id, 
 	        										   DATE_FORMAT(oi.date_end, '".Settings::getMySQLDateFormat('dateformat')."') as expiringdate,
@@ -234,15 +248,36 @@ class OrdersItems extends BaseOrdersItems {
 	        										   c.password as password,
 	        										   c.parent_id as reseller, 
 	        										   oi.autorenew as renew,
+	    	                                           p.product_id as product_id,
+	    	                                           p.type as type,
+	    											   d.domain as domain_id,
+	    											   CONCAT(d.domain, '.', ws.tld) as domain, 
 	        										   DATEDIFF(oi.date_end, CURRENT_DATE) as days" )
 	                                           ->from ( 'OrdersItems oi' )
 	                                           ->leftJoin ( 'oi.Orders o' )
+	                                           ->leftJoin ( 'oi.OrdersItemsDomains oid' )
+	                                           ->leftJoin ( 'oid.Domains d' )
+	                                           ->leftJoin ( 'd.DomainsTlds dt' )
+	                                           ->leftJoin ( 'dt.WhoisServers ws' )
 	                                           ->leftJoin ( 'oi.Products p' )
+	                                           ->leftJoin ( 'p.ProductsAttributesGroups pag' )
 	                                           ->leftJoin ( "p.ProductsData pd WITH pd.language_id = 1" )
-	                                           ->leftJoin ( 'o.Customers c' )
-	                                           ->where ( 'p.type <> ?', 'domain')
-	                                           ->andWhere ( 'DATEDIFF(oi.date_end, CURRENT_DATE) >= ? and DATEDIFF(oi.date_end, CURRENT_DATE) <= ?', array($from, $to) );
+	                                           ->leftJoin ( 'o.Customers c' );
+	                                           
+	        if(!empty($types)){
+	        	$dq->andWhereIn('p.type', $types);
+	        }else{
+	        	$dq->where ( 'p.type <> ?', 'domain');
+	        }
 	        
+	        if(!empty($attributegrpcode)){
+	        	$dq->andWhereIn('pag.code', $attributegrpcode);
+	        }
+	        
+	    	if(!is_null($from) && !is_null($to)){
+	    		$dq->andWhere ( 'DATEDIFF(oi.date_end, CURRENT_DATE) >= ? and DATEDIFF(oi.date_end, CURRENT_DATE) <= ?', array($from, $to) );
+	    	}
+	    	
 	        if(is_numeric($status)){
 	        	$dq->andWhere ( 'oi.status_id = ?', $status );  
 	        }else{
@@ -253,7 +288,15 @@ class OrdersItems extends BaseOrdersItems {
 	        	$dq->andWhere ( 'oi.autorenew = ?', $autorenew );  
 	        }
 	        
-	        return $dq->execute ( null, Doctrine::HYDRATE_ARRAY );
+	        $dq->orderBy('oi.date_end asc');
+	        
+	        $records = $dq->execute ( null, Doctrine::HYDRATE_ARRAY );
+	        
+	        for($i=0;$i<count($records);$i++){
+	        	$records[$i]['price'] = $currency->toCurrency($records[$i]['price'], array('currency' => Settings::findbyParam('currency')));
+	        }
+	        
+	        return $records;
 	        
     	}catch (Exception $e){
     		die($e->getMessage());
@@ -352,14 +395,13 @@ class OrdersItems extends BaseOrdersItems {
 		if(!is_array($params))
 			return false;
 		
-		if(!empty($params['billing_cycle_id']))
-			$months = BillingCycle::getMonthsNumber ( $params ['billing_cycle_id'] );
-			if ($months > 0) 
-				$params ['date_end'] = Shineisp_Commons_Utilities::add_date ( $params ['date_start'], null, $months );
-			
-		
 		$details = Doctrine::getTable ( 'OrdersItems' )->find ( $id );
 		
+		// Generic price setting 
+		$rowtotal = $params ['price'];
+		$vat = null;
+		$percentage = null;
+	
 		// Get the taxes applied
 		$tax = Taxes::getTaxbyProductID($params['product_id']);
 		if ($tax['percentage'] > 0) {
@@ -367,10 +409,26 @@ class OrdersItems extends BaseOrdersItems {
 			$vat = ($params ['price'] * $tax['percentage']) / 100;
 			$percentage = $tax['percentage'];
 		} else {
-			$rowtotal = $params ['price'];
-			$vat = null;
-			$percentage = null;
+			if(!empty($params['parameters'])){ // it is a domain
+				$domainparams = json_decode ( $params ['parameters'], true );
+
+				if (! empty ( $domainparams['domain'] ['tld'] )) {
+					$tax = Taxes::getTaxbyTldID($domainparams ['domain']['tld']);
+					
+					if ($tax['percentage'] > 0) {
+						$vat = ($params ['price'] * $tax['percentage']) / 100;
+						$percentage = $tax['percentage'];
+						$rowtotal = $params ['price'] * (100 + $tax['percentage']) / 100;
+					}
+				}
+			}
 		}
+		
+	    if(!empty($params['billing_cycle_id']))
+		    $months = BillingCycle::getMonthsNumber ( $params ['billing_cycle_id'] );
+		    if ($months > 0 && is_numeric($params ['product_id']) && $params ['product_id'] > 0) // only for the product and services. Domains excluded
+		        $rowtotal = $rowtotal * $months;
+		        $params ['date_end'] = Shineisp_Commons_Utilities::add_date ( $params ['date_start'], null, $months );
 		
 		$details->quantity         = $params ['quantity'];
 		$details->date_start       = Shineisp_Commons_Utilities::formatDateIn ( $params ['date_start'] );
@@ -383,11 +441,12 @@ class OrdersItems extends BaseOrdersItems {
 		$details->product_id       = is_numeric($params ['product_id']) && $params ['product_id'] > 0 ? $params ['product_id'] : NULL;
 		$details->setupfee         = $params ['setupfee'];
 		$details->discount         = $params ['discount'];
+		$details->subtotal         = $rowtotal * $params ['quantity'];
 		$details->status_id        = $params ['status_id'];
 		$details->description      = $params ['description'];
 		$details->parameters       = $params ['parameters'];
 		
-		if($details->trySave ())
+		if($details->trySave ()){
 			OrdersItems::setAutorenew($id, $params ['autorenew']);
 
 			// Remove all domains
@@ -399,7 +458,7 @@ class OrdersItems extends BaseOrdersItems {
 			}
 			
 			return true;
-		
+		}
 		
 		return false;
 	}
@@ -897,193 +956,34 @@ class OrdersItems extends BaseOrdersItems {
 		return $result;					
 	}	
 	
-	######################################### CRON METHODS ############################################
-
 	/**
-	 * CREATE THE ORDER FOR ALL THE AUTORENEWABLE DOMAINS/SERVICES
-	 * Check all the services [domains, products] and create the orders for each customer only if the service has been set as renewable
-	 * @return void
+	 * Get the list of services
+	 * by default it gets only the hosting service
+	 * 
+	 * @param array $product_types
+	 * @return array
 	 */
-	public static function checkServices() {
-		try {
-			$i = 0;
-			$customers = array ();
-				
-			/* We have to start to get all the domains that them expiring date is today
-			 then we have to create a custom array sorted by customerID in order to
-			group services and domains of a particular customer.
-			*/
-				
-			// Get all the active domains that expire in 1 day
-			$domains = Domains::getExpiringDomainsByDays ( 1, Statuses::id("active", "domains") );
-			
-			if ($domains) {
-				Shineisp_Commons_Utilities::log("There are (".count($domains).") new domains to renew");
-				
-				// Create the customer group list for the email summary
-				foreach ( $domains as $domain ) {
-					if (is_numeric($domain ['reseller'])) {
-						$invoice_dest = Customers::getAllInfo ( $domain ['reseller'] );
-						$customers [$domain ['customer_id']] ['id'] = $invoice_dest ['customer_id'];
-						$customers [$domain ['customer_id']] ['fullname'] = $invoice_dest ['firstname'] . " " . $invoice_dest ['lastname'] . " " . $invoice_dest ['company'];
-						$customers [$domain ['customer_id']] ['email'] = $invoice_dest ['email'];
-						$customers [$domain ['customer_id']] ['language_id'] = $invoice_dest ['language_id'];
-					} else {
-						$customers [$domain ['customer_id']] ['id'] = $domain ['customer_id'];
-						$customers [$domain ['customer_id']] ['fullname'] = $domain ['fullname'];
-						$customers [$domain ['customer_id']] ['email'] = $domain ['email'];
-						$customers [$domain ['customer_id']] ['language_id'] = $domain ['language_id'];
-					}
-					$customers [$domain ['customer_id']] ['products'] [$i] ['name'] = $domain ['domain'];
-					$customers [$domain ['customer_id']] ['products'] [$i] ['type'] = "domain";
-					$customers [$domain ['customer_id']] ['products'] [$i] ['renew'] = $domain ['renew'];
-					$customers [$domain ['customer_id']] ['products'] [$i] ['expiring_date'] = $domain ['expiringdate'];
-					$customers [$domain ['customer_id']] ['products'] [$i] ['days'] = $domain ['days'];
+	public static function getServices(array $product_types = array(), array $product_attribute_groups = array()){
+		
+		$translator = Shineisp_Registry::getInstance ()->Zend_Translate;
+		$records['data'] = self::getExpiringServicesByRange(-10, 30, Statuses::id("complete", "orders"), null, $product_types, $product_attribute_groups);
 
-					// Get the last old order item id 
-					if(!empty($domain['oldorders'])){
-						// find the domain 
-						foreach ($domain['oldorders'] as $olditemorder){
-							
-							// Get all the information from the old order
-							$olditem = OrdersItems::getAllInfo($olditemorder['orderitem_id']);
-							
-							// Check if the old order item refers to the domain selected   
-							if(!empty($olditem['parameters']) && !empty($olditem['tld_id'])){
-								
-								// Get the old configuration parameters
-								$params = json_decode($olditem['parameters'], true);
-								
-								// Extract the domain name and match it with the domain selected
-								if(!empty($params['domain']) && $params['domain'] == $domain['domain']){
-									$customers [$domain ['customer_id']] ['products'] [$i] ['oldorderitemid'] = $olditemorder['orderitem_id'];
-								}
-							}
-						}
-					}
-					Shineisp_Commons_Utilities::log("- " . $domain ['domain']);
-					$i ++;
-				}
-			}
-// 			Zend_Debug::dump($customers);
-			/*
-			 * Now we have to get the services expired and we have to sum the previous $customers array with these
-			* new information.
-			*/
-				
-			// Get all the services active that expire the day after
-			$services = OrdersItems::getExpiringServicesByDays ( 1, Statuses::id("complete", "orders") );
-			
-			if ($services) {
-				
-				Shineisp_Commons_Utilities::log("There are (".count($services).") new services to renew");
-				
-				// Create the customer group list for the email summary
-				foreach ( $services as $service ) {
-					if (is_numeric($service ['reseller'])) {
-						$invoice_dest = Customers::getAllInfo ( $service ['reseller'] );
-						$customers [$service ['customer_id']] ['id'] = $invoice_dest ['customer_id'];
-						$customers [$service ['customer_id']] ['fullname'] = $invoice_dest ['firstname'] . " " . $invoice_dest ['lastname'] . " " . $invoice_dest ['company'];
-						$customers [$service ['customer_id']] ['email'] = $invoice_dest ['email'];
-						$customers [$service ['customer_id']] ['password'] = $invoice_dest ['password'];
-						$customers [$service ['customer_id']] ['language_id'] = $invoice_dest ['language_id'];
-					} else {
-						$customers [$service ['customer_id']] ['id'] = $service ['id'];
-						$customers [$service ['customer_id']] ['fullname'] = $service ['fullname'];
-						$customers [$service ['customer_id']] ['email'] = $service ['email'];
-						$customers [$service ['customer_id']] ['password'] = $service ['password'];
-						$customers [$service ['customer_id']] ['language_id'] = $service ['language_id'];
-					}
-					$customers [$service ['customer_id']] ['products'] [$i] ['name'] = $service ['product'];
-					$customers [$service ['customer_id']] ['products'] [$i] ['type'] = "service";
-					$customers [$service ['customer_id']] ['products'] [$i] ['renew'] = $service ['renew'];
-					$customers [$service ['customer_id']] ['products'] [$i] ['expiring_date'] = $service ['expiringdate'];
-					$customers [$service ['customer_id']] ['products'] [$i] ['days'] = $service ['days'];
-					$customers [$service ['customer_id']] ['products'] [$i] ['oldorderitemid'] = $service ['detail_id'];
-					
-					Shineisp_Commons_Utilities::log("- " . $service ['product']);
-					$i ++;
-				}
-			}
-			
-			// Create the emailS for the customers
-			if (count ( $customers ) > 0) {
+		// adding the index reference
+		$records['index'] = "detail_id";
+		
+		// Create the header table columns
+		$records['fields'] = array('product' => array('label' => $translator->translate('Service'), 'type' => 'link', 'link' => array('idx' => 'product_id', 'href' => '/admin/products/edit/id/id/%s')),
+									'domain' => array('label' => $translator->translate('Domain'), 'type' => 'link', 'link' => array('idx' => 'domain_id', 'href' => '/admin/domains/edit/id/%s')),
+									'expiringdate' => array('label' => $translator->translate('Expiry Date'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
+									'fullname' => array('label' => $translator->translate('Full name'), 'type' => 'link', 'link' => array('idx' => 'id', 'href' => '/admin/customers/edit/id/%s'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
+									'renew' => array('label' => $translator->translate('Auto renewal'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
+									'price' => array('label' => $translator->translate('Due')),
+									'days' => array('label' => $translator->translate('Days')));
+		
+		
+		return $records;
+	} 
 	
-				foreach ( $customers as $customer ) {
-					$items = "";
-						
-					// **** CREATE THE ORDER FOR ALL THE AUTORENEWABLE DOMAINS/SERVICES ***
-					// ============================================================
-					// Renew all the services and domain where the customer has choosen the autorenew of the service.
-					$orderID = Orders::renewOrder ( $customer ['id'], $customer ['products'] );
-
-					if (is_numeric ( $orderID )) {
-						$link = Fastlinks::findlinks ( $orderID, $customer ['id'], 'orders' );
-	
-						// Create the fast link to include in the email
-						if (! empty ( $link [0] ['code'] )) {
-							$url = "http://" . $_SERVER ['HTTP_HOST'] . "/index/link/id/" . $link [0] ['code'];
-						} else {
-							$url = "http://" . $_SERVER ['HTTP_HOST'];
-						}
-					
-						Shineisp_Commons_Utilities::sendEmailTemplate($customer ['email'], 'order_renew', array(
-							'fullname' => $customer['fullname'],
-							':shineisp:' => $customer
-							,'url'       => $url
-						), null, null, null, null, $customer['language_id']);
-						
-						
-					}
-				}
-			}
-			
-			die;
-			/*
-			 * Now we have to set as expired all the domains records that the date is the date of the expiring of the domain
-			* // Expired
-			*/
-			$dq = Doctrine_Query::create ()->update ( 'Domains d' )->set ( 'd.status_id', Statuses::id('expired', 'domains') )->where ( 'DATEDIFF(d.expiring_date, CURRENT_DATE) <= ?', 0 )->addWhere ( 'DATEDIFF(d.expiring_date, CURRENT_DATE) >= ?', 0 );
-			$dq->execute ( null, Doctrine::HYDRATE_ARRAY );
-				
-			/*
-			 * Now we have to set as closed all the domains records that the date is older of -2 days
-			* // Closed
-			*/
-			$dq = Doctrine_Query::create ()->update ( 'Domains d' )->set ( 'd.status_id', Statuses::id('suspended', 'domains') )->where ( 'DATEDIFF(d.expiring_date, CURRENT_DATE) <= ?', - 2 );
-			$dq->execute ( null, Doctrine::HYDRATE_ARRAY );
-				
-			/*
-			 * Now we have to set as expired all the services records
-			* // Expired
-			*/
-			$dq = Doctrine_Query::create ()->update ( 'OrdersItems oi' )->set ( 'oi.status_id', Statuses::id('expired', 'orders') )->where ( 'DATEDIFF(oi.date_end, CURRENT_DATE) <= ?', 0 );
-			$dq->execute ( null, Doctrine::HYDRATE_ARRAY );
-				
-			/*
-			 * Now we have to set as deleted all the services records
-			* // Deleted
-			*/
-			$dq = Doctrine_Query::create ()->update ( 'OrdersItems oi' )->set ( 'oi.status_id', Statuses::id('deleted', 'orders') )->where ( 'DATEDIFF(oi.date_end, CURRENT_DATE) <= ?', - 2 );
-			$dq->execute ( null, Doctrine::HYDRATE_ARRAY );
-				
-			Shineisp_Commons_Utilities::sendEmailTemplate(null, 'cron', array(
-				'cronjob'    => 'Check Services'
-			));				
-				
-				
-		} catch ( Exception $e ) {
-			Shineisp_Commons_Utilities::logs ($e->getMessage(), "cron.log" );
-			return false;
-		}
-	
-		return true;
-	}
-
-
-
-
-
 	/**
 	 * findByUUID
 	 * Get a record by uuid
@@ -1159,33 +1059,6 @@ class OrdersItems extends BaseOrdersItems {
             // log
             Shineisp_Commons_Utilities::logs ( __METHOD__ .  " - Order changed from #".$oldOrderId." to #".$OrderItem['order_id'] );
         } 		 
-		
-// 		if ( !empty($OrderItem['callback_url']) ) {
-			
-// 			// Set item to complete			
-//             OrdersItems::set_status($orderItemId, Statuses::id("complete", "orders"));
-//             $ordersItem = self::find($orderItemId);
-//             $ordersItem = $ordersItem->toArray();
-//             $OrderItem  = array_shift($ordersItem);
-            
-			
-//             $paramsOrderItem                = $OrderItem;
-//             $paramsOrderItem['upgrade']     = $upgrade_uuid;
-//             unset( $paramsOrderItem['note'] );
-//             unset( $paramsOrderItem['callback_url'] );
-			
-// 			// Do the callback 
-// 			Shineisp_Commons_Utilities::log( __METHOD__ . " - Server URL Callback :: {$OrderItem['callback_url']} ","api.log");
-//             Shineisp_Commons_Utilities::log( __METHOD__ . " - Parameters ".print_r($paramsOrderItem,true),"api.log");
-// 			Shineisp_Commons_Utilities::doCallbackPOST($OrderItem['callback_url'], $paramsOrderItem);
-            
-//             //Check if all orderitem of order is complete and if is ok set order to complete
-//             if( Orders::checkIfOrderItemsAreCompleted( $OrderItem['order_id'] ) ) {
-//                 Orders::set_status($OrderItem['order_id'], Statuses::id("complete", "orders"));
-//             }
-			
-// 			return true;
-// 		}
 
 		if ( empty($OrderItem['parameters']) ) {
 			Shineisp_Commons_Utilities::logs (__METHOD__ . " - Order items setup parameters empty" );
@@ -1227,5 +1100,4 @@ class OrdersItems extends BaseOrdersItems {
 		}
 
 	}
-
 }

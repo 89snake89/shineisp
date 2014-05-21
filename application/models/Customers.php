@@ -318,6 +318,8 @@ class Customers extends BaseCustomers {
                 if( $customer->isp_id != Isp::getCurrentId() ) {
                     return false;
                 }
+                
+                $customer['created_at'] = date('Y-m-d h:i:s');
 			}else{
 				$customer = new Customers();
 			}
@@ -353,6 +355,7 @@ class Customers extends BaseCustomers {
 			$customer['isreseller'] = ! empty ( $data ['isreseller'] ) ? $data ['isreseller'] : Null;
 			$customer['ignore_latefee'] = (bool)$data ['ignore_latefee'];
 			$customer['language_id'] = $data['language_id'];
+			$customer['updated_at'] = date('Y-m-d h:i:s');
             $customer['isp_id']         = Isp::getCurrentId();
 			
 			$customer->save();
@@ -379,8 +382,6 @@ class Customers extends BaseCustomers {
 			
 			// Save the upload file
 			self::UploadDocument($customer['customer_id'], $data['filecategory']);
-	
-			
 		
 			return $customer['customer_id'];
 		}
@@ -1122,7 +1123,6 @@ class Customers extends BaseCustomers {
         
 	    $records['data']   = $dq->execute ( null, Doctrine::HYDRATE_ARRAY );
         
-		$data = array();
 		for($i=0;$i<count($records['data']);$i++){
 			$records['data'][$i]['grandtotal']    = $currency->toCurrency($records['data'][$i]['grandtotal'], array('currency' => Settings::findbyParam('currency')));
 		}
@@ -1131,14 +1131,12 @@ class Customers extends BaseCustomers {
 		$records['index'] = "id";
 		
 		// Create the header table columns
-		$records['fields'] = array(
-									'id' => array('label' => $translator->translate('ID'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
-									'lastname' => array('label' => $translator->translate('Last name'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
+		$records['fields'] = array( 'lastname' => array('label' => $translator->translate('Last name'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
 									'firstname' => array('label' => $translator->translate('First name'), 'attributes' => array('class' => 'visible-lg visible-md hidden-xs')),
 									'company' => array('label' => $translator->translate('Company')),
 									'grandtotal' => array('label' => $translator->translate('Total')));
 		
-		return $data;
+		return $records;
 	}
 	
 	/**
@@ -1166,27 +1164,8 @@ class Customers extends BaseCustomers {
         
         $datarecords = $dq->execute(array (), Doctrine_Core::HYDRATE_ARRAY);
 
-		// Strip the customer_id field
-		if(!empty($datarecords)){
-			foreach($datarecords as $key => $value) {
-			  	array_shift($value);
-			  	$newarray[] = $value;
-			  	$chartLabels[] = $value['status'];
-			  	$chartValues[] = $value['items'];
-			}
-			// Chart link
-			$chart = "https://chart.googleapis.com/chart?chs=250x100&chd=t:".implode(",", $chartValues)."&cht=p3&chl=".implode("|", $chartLabels);
-		}
-		
-		$record_group2 = Doctrine_Query::create ()
-									->select ( "customer_id, count(*) as total" )
-									->from ( 'Customers c' )
-                                    ->andWhere( "c.isp_id = ?", Isp::getCurrentId() )
-									->execute(array (), Doctrine_Core::HYDRATE_ARRAY);
-		
-		$records['data'] = $newarray;
+		$records['data'] = $datarecords;
 		$records['fields'] = array('items' => array('label' => $translator->translate('Items')), 'status' => array('label' => $translator->translate('Status')));
-		$records['chart'] = $chart;
 		
 		return $records;
 	}

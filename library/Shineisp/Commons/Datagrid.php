@@ -146,9 +146,11 @@ class Shineisp_Commons_Datagrid {
 	 * Check if some field is filterable attached
 	 */
 	public function hasFilters() {
-		foreach ( $this->columns as $column ) {
-			if (! empty ( $column ['filterable'] ) && $column ['filterable']) {
-				return true;
+		if(!empty($this->columns)){
+			foreach ( $this->columns as $column ) {
+				if (! empty ( $column ['filterable'] ) && $column ['filterable']) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -291,7 +293,7 @@ class Shineisp_Commons_Datagrid {
 			foreach ( $actions as $item ) {
 				$links [] = '<a title="' . $item ['label'] . '" class="actions" href="' . $item ['action'] . '"><i class="' . $item ['cssicon'] . '"></i> ' . $item ['label'] . '</a>';
 			}
-			$this->addColumn ( array ('label' => 'Actions', 'alias' => $indexfield, 'type' => 'link', 'pattern' => $links ) );
+			$this->addColumn ( array ('label' => 'Actions', 'alias' => $indexfield, 'type' => 'multilink', 'pattern' => $links ) );
 			$this->setHasActions(true); 
 		}
 		
@@ -676,28 +678,29 @@ class Shineisp_Commons_Datagrid {
 				$html .= "<tr class='datarow'>";
 				$hiddenCols = $this->getHiddencols();
 				$colindex = 0;
-				
-				foreach ( $this->columns as $column ) {
-					if(!empty($column['alias'])){
-						if(in_array($column['alias'], $hiddenCols)){
-							if(!empty($column['type'])) {
-								if($column['type'] == "link"){
-									$html .= "<td ". $this->addAttrColumns ( $colindex ) .">";
-									$html .= $this->addObject ( $record, $column );
-									$html .= "</td>";
+				if(!empty($this->columns)){
+					foreach ( $this->columns as $column ) {
+						if(!empty($column['alias'])){
+							if(in_array($column['alias'], $hiddenCols)){
+								if(!empty($column['type'])) {
+									if($column['type'] == "link"){
+										$html .= "<td ". $this->addAttrColumns ( $colindex ) .">link ";
+										$html .= $this->addObject ( $record, $column );
+										$html .= "</td>";
+									}
 								}
+							}else {
+								$html .= "<td ". $this->addAttrColumns ( $colindex ) .">";
+								$html .= $this->addObject ( $record, $column );
+								$html .= "</td>";
 							}
-						}else {
+						}else{
 							$html .= "<td ". $this->addAttrColumns ( $colindex ) .">";
 							$html .= $this->addObject ( $record, $column );
 							$html .= "</td>";
 						}
-					}else{
-						$html .= "<td ". $this->addAttrColumns ( $colindex ) .">";
-						$html .= $this->addObject ( $record, $column );
-						$html .= "</td>";
+						$colindex++;
 					}
-					$colindex++;
 				}
 				
 				if ($this->hassubrecords) {
@@ -856,7 +859,7 @@ class Shineisp_Commons_Datagrid {
 					return $class::$method($record [$column ['index']]);	
 				}
 				
-			} elseif ($column ['type'] == "link") {
+			} elseif ($column ['type'] == "multilink") {
 				$links = array ();
 				if (! empty ( $column ['pattern'] ) && is_array ( $column ['pattern'] )) {
 					foreach ( $column ['pattern'] as $pattern ) {
@@ -864,8 +867,28 @@ class Shineisp_Commons_Datagrid {
 					}
 					return implode ( "&nbsp;", $links );
 				}
+				
+			}elseif ($column ['type'] == "link"){
+				$link = "";
+				$label = $record [$column ['alias']];
+				
+				if(!empty($column['link'])){
+					if(is_array($column['link']) && !empty($column ['link']['idx']) && !empty($column ['link']['href'])){
+						$link = str_replace("%s", $record [$column ['link']['idx']], $column['link']['href']);
+					}else{
+						$link = str_replace("%s", "", $column['link']);
+					}
+				}else{
+					$link = $record [$column ['alias']] . " (no link)";
+				}
+				
+				$link = "<a href=\"$link\" class=\"\">$label</span>";
+				return $link;
+			}else{
+				return $record [$column ['alias']];
 			}
 		}
+		
 		if (!empty ( $column ['alias'] )) {
 			if (isset ( $record [$column ['alias']] )) {
 				return $record [$column ['alias']];
