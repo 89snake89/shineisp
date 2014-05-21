@@ -395,14 +395,13 @@ class OrdersItems extends BaseOrdersItems {
 		if(!is_array($params))
 			return false;
 		
-		if(empty($params ['date_end']))
-			if(!empty($params['billing_cycle_id']))
-				$months = BillingCycle::getMonthsNumber ( $params ['billing_cycle_id'] );
-				if ($months > 0) 
-					$params ['date_end'] = Shineisp_Commons_Utilities::add_date ( $params ['date_start'], null, $months );
-			
 		$details = Doctrine::getTable ( 'OrdersItems' )->find ( $id );
 		
+		// Generic price setting 
+		$rowtotal = $params ['price'];
+		$vat = null;
+		$percentage = null;
+	
 		// Get the taxes applied
 		$tax = Taxes::getTaxbyProductID($params['product_id']);
 		if ($tax['percentage'] > 0) {
@@ -410,10 +409,26 @@ class OrdersItems extends BaseOrdersItems {
 			$vat = ($params ['price'] * $tax['percentage']) / 100;
 			$percentage = $tax['percentage'];
 		} else {
-			$rowtotal = $params ['price'];
-			$vat = null;
-			$percentage = null;
+			if(!empty($params['parameters'])){ // it is a domain
+				$domainparams = json_decode ( $params ['parameters'], true );
+
+				if (! empty ( $domainparams['domain'] ['tld'] )) {
+					$tax = Taxes::getTaxbyTldID($domainparams ['domain']['tld']);
+					
+					if ($tax['percentage'] > 0) {
+						$vat = ($params ['price'] * $tax['percentage']) / 100;
+						$percentage = $tax['percentage'];
+						$rowtotal = $params ['price'] * (100 + $tax['percentage']) / 100;
+					}
+				}
+			}
 		}
+		
+	    if(!empty($params['billing_cycle_id']))
+		    $months = BillingCycle::getMonthsNumber ( $params ['billing_cycle_id'] );
+		    if ($months > 0 && is_numeric($params ['product_id']) && $params ['product_id'] > 0) // only for the product and services. Domains excluded
+		        $rowtotal = $rowtotal * $months;
+		        $params ['date_end'] = Shineisp_Commons_Utilities::add_date ( $params ['date_start'], null, $months );
 		
 		$details->quantity         = $params ['quantity'];
 		$details->date_start       = Shineisp_Commons_Utilities::formatDateIn ( $params ['date_start'] );
@@ -426,11 +441,12 @@ class OrdersItems extends BaseOrdersItems {
 		$details->product_id       = is_numeric($params ['product_id']) && $params ['product_id'] > 0 ? $params ['product_id'] : NULL;
 		$details->setupfee         = $params ['setupfee'];
 		$details->discount         = $params ['discount'];
+		$details->subtotal         = $rowtotal * $params ['quantity'];
 		$details->status_id        = $params ['status_id'];
 		$details->description      = $params ['description'];
 		$details->parameters       = $params ['parameters'];
 		
-		if($details->trySave ())
+		if($details->trySave ()){
 			OrdersItems::setAutorenew($id, $params ['autorenew']);
 
 			// Remove all domains
@@ -442,7 +458,7 @@ class OrdersItems extends BaseOrdersItems {
 			}
 			
 			return true;
-		
+		}
 		
 		return false;
 	}

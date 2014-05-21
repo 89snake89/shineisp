@@ -1754,30 +1754,33 @@ class Orders extends BaseOrders {
 	
 					foreach ( $details as $detail ) {
 						
-						$isDomain = !empty($detail['tld_id']) && is_numeric($detail['tld_id']) ? true : false;
-						$isProduct = !empty($detail['product_id']) && is_numeric($detail['product_id']) ? true : false;
+						$type = !empty($detail['product_id']) && is_numeric($detail['product_id']) ? "product" : "domain";
 						$product = $detail['Products'];
 						
-						if($isDomain){
+						if($type == "domain"){
 							
 							// Calculate the price per Quantity
 							$subtotal = $detail ['price']  * $detail ['quantity'];
 							
 							$setupfee = 0;
 							
-						}elseif($isProduct){
+						}elseif($type == "product"){
 
 							$isRecurring = Products::isRecurring($detail['product_id']);
 							
 							if($isRecurring){
 							
 								$setupfee = $detail ['setupfee'];
+								$subtotal = $detail ['price'];
 								
 								// Price multiplier
 								$months = $detail ['BillingCycle'] ['months'];
+								if(!empty($months) && is_numeric($months)){
+								    $subtotal = ($detail ['price'] * $months);
+								}
 								
 								// Calculate the price per the months per Quantity
-								$subtotal = ($detail ['price'] * $months) * $detail ['quantity'];
+								$subtotal = $subtotal * $detail ['quantity'];
 								
 								if(!empty($detail ['discount'])){
 									$discount = ($subtotal * $detail ['discount']) / 100;
@@ -1800,12 +1803,12 @@ class Orders extends BaseOrders {
 						// ... and add the setup fees
 						$price = $subtotal + $setupfee - $discount;
 						$total += $price;
-						$costs += $detail ['cost'];
+						$costs += $detail ['cost'] * $detail ['quantity'];
 						
 						if( !$isTaxFree && !$isVATFree ){
 							
 							// If the product is a domain 
-							if($isDomain){
+							if($type == "domain"){
 								$tax = Taxes::getTaxbyTldID($detail ['tld_id']);	
 							}else{ // If not
 								$tax = Taxes::getTaxbyProductID($detail ['product_id']);
